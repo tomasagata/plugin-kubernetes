@@ -35,8 +35,7 @@ spec:
         - name: MQTT_BROKER_PORT
           value: "10003"
         - name: MQTT_BROKER_URL
-          #value: "10.106.163.16" # cluster-1 #"mosquitto-svc.oakestra-network.svc.cluster.local"
-          value: "10.98.205.242" # cluster-2
+          value: "10.98.205.242"
         - name: ROOT_SERVICE_MANAGER_URL
           value: "192.168.123.225"
         - name: ROOT_SERVICE_MANAGER_PORT
@@ -46,8 +45,7 @@ spec:
         - name: SYSTEM_MANAGER_PORT
           value: "10000"
         - name: CLUSTER_MONGO_URL
-          #value: "10.104.138.134" # Cluster-1 #"mongo-svc.oakestra-network.svc.cluster.local"
-          value: "10.111.244.141" # Cluster-2
+          value: "10.111.244.141"
         - name: CLUSTER_MONGO_PORT
           value: "27017"
 ---

@@ -7,7 +7,7 @@ import (
 )
 
 func GetConfig() *Config {
-	config := &Config{ // Default values
+	config := &Config{
 		RootSystemManagerPort:   10000,
 		RootServiceManagerPort:  10099,
 		RootGRPCPort:            50052,

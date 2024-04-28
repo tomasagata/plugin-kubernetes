@@ -14,25 +14,28 @@ Um das Oakestra Network zu starten, müssen mehrere Komponenten gestartet werden
 Für den [Nodenetmanager](Deployment/oakestra-nodenetmanager/node-netmanager.yaml) müssen diese Variablen gesetzt werden. 
 
 
-| Variable Name                   | Default Values      | Description                                                     |
+| Variable Name                   | Default Values      | Description                                                     | 
 |---------------------------------|---------------------|-----------------------------------------------------------------|
 | NODE_PORT          | 50103     | public node port for oakestra network                                                |
 | MOSQUITTO_SVC_SERVICE_PORT       | 30033               | -                                             |
-| MOSQUITTO_SVC_SERVICE_HOST       | 192.168.123.30               | - 
+| MOSQUITTO_SVC_SERVICE_HOST       | localhost               | NodePort, accesible through localhost
 
 
 Für den [Cluster Service Manager](Deployment/oakestra-cluster-service-manager/oakestra-cluster-service-manager.yaml) müssen diese Variablen gesetzt werden. 
+
+The **MQTT_BROKER_URL** and **CLUSTER_MONGO_URL** need to be configured. These values should be derived from the **mosquitto-svc** and **mongo-svc** services located in the *oakestra-system* namespace. The assigned values must match the ClusterIPs of these services.
+
 
 | Variable Name               | Default Value          | Description  |
 |-----------------------------|------------------------|--------------|
 | MY_PORT                     | 10110                  | Local port which starts server  |
 | MQTT_BROKER_PORT            | 10003                  |       -       |
-| MQTT_BROKER_URL             | 10.98.205.242          |       -       |
+| MQTT_BROKER_URL             | *Needs to be set*        |  ClusterIP of Mosquitto Service     |
 | ROOT_SERVICE_MANAGER_URL    | 192.168.123.225        |    IP Oakestra Root Network          |
 | ROOT_SERVICE_MANAGER_PORT   | 10099                  |   Port Oakestra Root Network            |
 | SYSTEM_MANAGER_URL          | 192.168.123.225        |     IP Oakestra Root         |
 | SYSTEM_MANAGER_PORT         | 10000                  |    Port Oakestra Root          |
-| CLUSTER_MONGO_URL           | 10.111.244.141         |          -    |
+| CLUSTER_MONGO_URL           | *Needs to be set*         |   ClusterIP of MongoDB Service    |
 | CLUSTER_MONGO_PORT          | 27017                  |        -      |
 
 

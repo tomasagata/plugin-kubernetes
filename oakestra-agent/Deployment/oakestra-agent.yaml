@@ -31,11 +31,9 @@ spec:
         - name: ROOT_GRPC_PORT
           value: "50052"
         - name: CLUSTER_NAME
-          #value: "KUBERNETES_A" # Cluster-1
-          value: "KUBERNETES_B" # Cluster-2
+          value: "KUBERNETES"
         - name: CLUSTER_LOCATION
-          #value: "KUBERNETES_LOCATION_A" # Cluster-1
-          value: "KUBERNETES_LOCATION_B" # Cluster-2
+          value: "KUBERNETES_LOCATION"
         - name: MY_PORT
           value: "10100"
         - name: NODE_PORT
@@ -43,8 +41,9 @@ spec:
         - name: CLUSTER_SERVICE_MANAGER_PORT
           value: "30330"
         - name: CLUSTER_SERVICE_MANAGER_IP
-          #value: "192.168.123.186" # Cluster-1
-          value: "192.168.123.30" # Cluster-2
+          value: "localhost" 
+          # Set to 'localhost' since this is a NodePort service
+
 
     
 ---
