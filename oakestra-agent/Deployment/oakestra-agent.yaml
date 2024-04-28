@@ -1,0 +1,151 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oakestra-agent
+  namespace: oakestra-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oakestra-agent
+  template:
+    metadata:
+      labels:
+        app: oakestra-agent
+        plugin: oakestra
+    spec:
+      serviceAccountName: oakestra-agent
+      containers:
+      - name: oakestra-agent
+        image: ghcr.io/jakobke/oakestra-agent:1.0-amd
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        env:
+        - name: ROOT_SYSTEM_MANAGER_IP
+          value: "192.168.123.225"
+        - name: ROOT_SYSTEM_MANAGER_PORT
+          value: "10000"
+        - name: ROOT_SERIVCE_MANAGER_PORT
+          value: "10099"
+        - name: ROOT_GRPC_PORT
+          value: "50052"
+        - name: CLUSTER_NAME
+          #value: "KUBERNETES_A" # Cluster-1
+          value: "KUBERNETES_B" # Cluster-2
+        - name: CLUSTER_LOCATION
+          #value: "KUBERNETES_LOCATION_A" # Cluster-1
+          value: "KUBERNETES_LOCATION_B" # Cluster-2
+        - name: MY_PORT
+          value: "10100"
+        - name: NODE_PORT
+          value: "30000"
+        - name: CLUSTER_SERVICE_MANAGER_PORT
+          value: "30330"
+        - name: CLUSTER_SERVICE_MANAGER_IP
+          #value: "192.168.123.186" # Cluster-1
+          value: "192.168.123.30" # Cluster-2
+
+    
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: oakestra-agent
+  namespace: oakestra-system
+spec:
+  selector:
+    app: oakestra-agent
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 10100
+      targetPort: 10100
+      nodePort: 30000
+
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: oakestra-agent
+  namespace: oakestra-system
+
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: oakestra-agent-ns-oakestra
+subjects:
+- kind: ServiceAccount
+  name: oakestra-agent
+  namespace: oakestra
+roleRef:
+  kind: ClusterRole
+  name: oakestra-agent
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: oakestra-agent-ns-oakestra-system
+subjects:
+- kind: ServiceAccount
+  name: oakestra-agent
+  namespace: oakestra-system
+roleRef:
+  kind: ClusterRole
+  name: oakestra-agent
+  apiGroup: rbac.authorization.k8s.io
+
+--- 
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: oakestra-agent-ns-oakestra-controller-manager
+subjects:
+- kind: ServiceAccount
+  name: oakestra-agent
+  namespace: oakestra-controller-manager
+roleRef:
+  kind: ClusterRole
+  name: oakestra-agent
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: oakestra-agent
+rules:
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "list"]
+- apiGroups: ["metrics.k8s.io"]
+  resources: ["nodes"]
+  verbs: ["get", "list"]
+- apiGroups: ["oakestra.oakestra.kubernetes"]
+  resources: ["oakestrajobs"]
+  verbs: ["get", "list", "create", "update", "delete"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "create", "update", "delete"]
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oakestra-cluster-info
+  namespace: oakestra-controller-manager
+data:
+  CLUSTER_ID: ""
+  OAKESTRA_ROOT_IP: ""
+  OAKESTRA_ROOT_NETWORK_PORT: ""

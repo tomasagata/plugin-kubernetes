@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-netmanager
+  namespace: oakestra-system
+  labels:
+    app: netmanager
+spec:
+  selector:
+    matchLabels:
+      app: netmanager
+  template:
+    metadata:
+      labels:
+        app: netmanager
+    spec:
+      serviceAccountName: netmanager
+      hostPID: true
+      hostNetwork: true
+      containers:
+      - name: node-netmanager
+        image: ghcr.io/jakobke/oakestra-net-manager:0.4-amd
+        imagePullPolicy: Always
+        command: ['sh', '-c', 'netmanager']
+        ports:
+        - containerPort: 6000
+        securityContext:
+          allowPrivilegeEscalation: true
+          readOnlyRootFilesystem: false
+          runAsUser: 0
+          privileged: true
+          procMount: Default
+          capabilities:
+            add:
+              - SYS_ADMIN
+              - NET_ADMIN
+              - CAP_DAC_OVERRIDE
+        volumeMounts:
+        - name: host-more
+          mountPath: /
+        env:
+        - name: NODE_PORT
+          value: "50103"
+        - name: MOSQUITTO_SVC_SERVICE_PORT
+          value: "30033"
+        - name: MOSQUITTO_SVC_SERVICE_HOST
+          value: "192.168.123.30"
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+      volumes:
+      - name: host-more
+        hostPath:
+          path: /
+      - name: cni-bin
+        hostPath:
+          path: /opt/cni/bin
+      - name: netmanager-bin
+        hostPath:
+          path: /
+      initContainers:
+      - name: init-cni-bin
+        image: ghcr.io/jakobke/oakestra-cni:1.0-amd
+        imagePullPolicy: Always
+        command: ['sh', '-c', 'cp /app/oakestra /opt/cni/bin/']
+        volumeMounts:
+        - name: cni-bin
+          mountPath: /opt/cni/bin
+        securityContext:
+          privileged: true
+      - name: init-netmanager-bin
+        image: ghcr.io/jakobke/oakestra-net-manager-exec:1.0-amd
+        imagePullPolicy: Always
+        command: ['sh', '-c', 'cp /app/netmanager /root/bin/']
+        volumeMounts:
+        - name: netmanager-bin
+          mountPath: /root
+        securityContext:
+          privileged: true
+
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: netmanager
+  namespace: oakestra-system
+
+
+--- 
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: netmanager
+  namespace: default
+rules:
+- apiGroups: [""]
+  resources: ["pods","nodes"]
+  verbs: ["get", "list", "watch"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: netmanager
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: netmanager
+  namespace: oakestra-system
+roleRef:
+  kind: ClusterRole
+  name: netmanager
+  apiGroup: rbac.authorization.k8s.io
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: netmanager
+  namespace: oakestra-system
+spec:
+  type: NodePort
+  selector:
+    app: netmanager
+  ports:
+    - protocol: TCP
+      port: 6000
+      targetPort: 6000
+      nodePort: 30010

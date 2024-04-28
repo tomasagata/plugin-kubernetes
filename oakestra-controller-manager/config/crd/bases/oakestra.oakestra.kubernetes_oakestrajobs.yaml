@@ -1,0 +1,211 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.13.0
+  name: oakestrajobs.oakestra.oakestra.kubernetes
+spec:
+  group: oakestra.oakestra.kubernetes
+  names:
+    kind: OakestraJob
+    listKind: OakestraJobList
+    plural: oakestrajobs
+    singular: oakestrajob
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: OakestraJob is the Schema for the OakestraJobs API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: OakestraJobSpec defines the desired state of OakestraJob
+              serviceSpec defines the desired state of a service in the cluster.
+            properties:
+              added_files:
+                description: Contains additional files associated with the service.
+                items:
+                  type: string
+                type: array
+              application_ID:
+                description: Unique ID of application
+                type: string
+              application_name:
+                description: Name of application
+                type: string
+              application_namespace:
+                description: Namespace of application
+                type: string
+              bandwidth_in:
+                description: Specifies the incoming bandwidth for the service.
+                type: integer
+              bandwidth_out:
+                description: Specifies the outgoing bandwidth for the service.
+                type: integer
+              cmd:
+                description: Commands for the service.
+                items:
+                  type: string
+                type: array
+              code:
+                description: Code which is used by the service
+                type: string
+              disk:
+                description: Represents the disk size what is needed
+                type: integer
+              image:
+                description: Image which is used by the container
+                type: string
+              instance_list:
+                description: StatusDetail provides additional details about the status
+                  of the service.
+                items:
+                  properties:
+                    cluster_ID:
+                      type: string
+                    cluster_location:
+                      type: string
+                    cpu:
+                      type: integer
+                    disk:
+                      type: integer
+                    host_IP:
+                      type: string
+                    host_port:
+                      type: string
+                    instance_number:
+                      type: integer
+                    last_modified_timestamp:
+                      type: string
+                    memory:
+                      type: integer
+                    status:
+                      type: string
+                    status_detail:
+                      type: string
+                    worker_ID:
+                      type: string
+                  required:
+                  - cluster_ID
+                  - cluster_location
+                  - instance_number
+                  type: object
+                type: array
+              job_name:
+                description: Full Name of Job
+                type: string
+              memory:
+                description: Specifies the amount of memory needed by the service.
+                type: integer
+              microservice_ID:
+                description: Unique ID of service
+                type: string
+              microservice_name:
+                description: Namespace of service
+                type: string
+              microservice_namespace:
+                description: Namespace of service
+                type: string
+              next_instance_progressive_number:
+                description: Instance Number of next instance
+                type: integer
+              port:
+                description: Specifies the ports used by the service.
+                type: string
+              state:
+                description: Represents the current status of the service.
+                type: string
+              status:
+                description: Represents the current status of the service.
+                type: string
+              status_detail:
+                description: StatusDetail provides additional details about the status
+                  of the service.
+                type: string
+              storage:
+                description: storage specifies the storage used by the service.
+                type: integer
+              vcpus:
+                description: Represents the number of virtual CPUs used by the service.
+                type: integer
+              vgpus:
+                description: Represents the number of virtual GPUs used by the service.
+                type: integer
+              virtualization:
+                description: Runtime indicates the type of virtualization used by
+                  the service.
+                type: string
+              vtpus:
+                description: Represents the number of virtual TPUs used by the service.
+                type: integer
+            required:
+            - application_ID
+            - application_name
+            - application_namespace
+            - code
+            - image
+            - instance_list
+            - job_name
+            - microservice_ID
+            - microservice_name
+            - microservice_namespace
+            - next_instance_progressive_number
+            - port
+            type: object
+          status:
+            description: OakestraJobStatus defines the observed state of OakestraJob
+            properties:
+              instanceList:
+                additionalProperties:
+                  properties:
+                    cluster_ID:
+                      type: string
+                    cluster_location:
+                      type: string
+                    cpu:
+                      type: integer
+                    disk:
+                      type: integer
+                    host_IP:
+                      type: string
+                    host_port:
+                      type: string
+                    instance_number:
+                      type: integer
+                    last_modified_timestamp:
+                      type: string
+                    memory:
+                      type: integer
+                    status:
+                      type: string
+                    status_detail:
+                      type: string
+                    worker_ID:
+                      type: string
+                  required:
+                  - cluster_ID
+                  - cluster_location
+                  - instance_number
+                  type: object
+                type: object
+            required:
+            - instanceList
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

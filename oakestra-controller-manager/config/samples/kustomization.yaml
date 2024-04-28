@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- oakestra_v1_OakestraJob.yaml
+#+kubebuilder:scaffold:manifestskustomizesamples

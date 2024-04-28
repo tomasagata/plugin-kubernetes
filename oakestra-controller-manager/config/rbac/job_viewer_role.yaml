@@ -1,0 +1,27 @@
+# permissions for end users to view OakestraJobs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: OakestraJob-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: oakestra-OakestraJob-operator
+    app.kubernetes.io/part-of: oakestra-OakestraJob-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: OakestraJob-viewer-role
+rules:
+- apiGroups:
+  - oakestra.oakestra.kubernetes
+  resources:
+  - OakestraJobs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - oakestra.oakestra.kubernetes
+  resources:
+  - OakestraJobs/status
+  verbs:
+  - get
