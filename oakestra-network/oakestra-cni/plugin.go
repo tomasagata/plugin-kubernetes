@@ -69,11 +69,6 @@ func extractPodNameAndNamespace(input string) (string, string) {
 		}
 	}
 
-	log.Println("INFORMATION… \n\n")
-
-	log.Println(name)
-	log.Println(namespace)
-
 	return name, namespace
 }
 

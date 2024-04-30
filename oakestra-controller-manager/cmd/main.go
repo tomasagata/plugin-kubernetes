@@ -17,8 +17,10 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
+	"time"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -100,12 +102,21 @@ func main() {
 	}
 	//+kubebuilder:scaffold:builder
 
+	webhookOakestraNetwork := &controller.WebhookOakestraNetwork{
+		Client:  mgr.GetClient(),
+		Decoder: admission.NewDecoder(mgr.GetScheme()),
+	}
+
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	err = webhookOakestraNetwork.UpdateClusterInfo(ctx)
+	if err != nil {
+		setupLog.Error(err, "unable to retrieve configMap")
+		os.Exit(1)
+	}
+
 	mgr.GetWebhookServer().Register("/mutate-v1-pod", &webhook.Admission{
-		Handler: &controller.WebhookOakestraNetwork{
-			Client:  mgr.GetClient(),
-			Decoder: admission.NewDecoder(mgr.GetScheme()),
-		},
-	})
+		Handler: webhookOakestraNetwork},
+	)
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up health check")
