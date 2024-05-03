@@ -7,9 +7,3 @@ webhooks:
   objectSelector:
     matchLabels:
       oakestra.io/network: active
-  patches:
-  - op: add
-    path: /webhooks/0/objectSelector
-    value:
-      matchLabels:
-        oakestra.io/network: active

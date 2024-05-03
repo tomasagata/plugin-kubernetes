@@ -17,10 +17,8 @@ limitations under the License.
 package main
 
 import (
-	"context"
 	"flag"
 	"os"
-	"time"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -105,13 +103,10 @@ func main() {
 	webhookOakestraNetwork := &controller.WebhookOakestraNetwork{
 		Client:  mgr.GetClient(),
 		Decoder: admission.NewDecoder(mgr.GetScheme()),
-	}
-
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	err = webhookOakestraNetwork.UpdateClusterInfo(ctx)
-	if err != nil {
-		setupLog.Error(err, "unable to retrieve configMap")
-		os.Exit(1)
+		ClusterInfo: controller.ClusterInfo{
+			ClusterID:             os.Getenv("CLUSTER_ID"),
+			RootServiceManagerURL: "http://" + os.Getenv("OAKESTRA_ROOT_IP") + ":" + os.Getenv("OAKESTRA_ROOT_NETWORK_PORT"),
+		},
 	}
 
 	mgr.GetWebhookServer().Register("/mutate-v1-pod", &webhook.Admission{

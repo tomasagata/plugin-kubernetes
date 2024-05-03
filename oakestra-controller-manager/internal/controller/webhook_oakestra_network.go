@@ -22,48 +22,30 @@ import (
 
 type WebhookOakestraNetwork struct {
 	client.Client
-	Decoder    *admission.Decoder
-	custerInfo clusterInfo
+	Decoder     *admission.Decoder
+	ClusterInfo ClusterInfo
 }
 
-type clusterInfo struct {
-	clusterID             string
-	rootServiceManagerURL string
-}
-
-func (oaknet *WebhookOakestraNetwork) UpdateClusterInfo(ctx context.Context) error {
-	log := log.FromContext(ctx)
-	cm := &corev1.ConfigMap{}
-	err := oaknet.Client.Get(ctx, client.ObjectKey{
-		Name:      "oakestra-cluster-info",
-		Namespace: "oakestra-controller-manager",
-	}, cm)
-	if err != nil {
-		log.Error(err, "Cannot retrieve ConfigMap oakestra-cluster-info")
-		return err
-	}
-
-	oaknet.custerInfo.clusterID = cm.Data["CLUSTER_ID"]
-	oaknet.custerInfo.rootServiceManagerURL = "http://" + cm.Data["OAKESTRA_ROOT_IP"] + ":" + cm.Data["OAKESTRA_ROOT_NETWORK_PORT"]
-
-	return nil
+type ClusterInfo struct {
+	ClusterID             string
+	RootServiceManagerURL string
 }
 
 func (oaknet *WebhookOakestraNetwork) undeployInstance(systemJobID string) {
 	instanceNumber := "0"
-	url := oaknet.custerInfo.rootServiceManagerURL + "/api/net/" + systemJobID + "/" + instanceNumber
+	url := oaknet.ClusterInfo.RootServiceManagerURL + "/api/net/" + systemJobID + "/" + instanceNumber
 	sendDeleteRequest(url)
 }
 
 func (oaknet *WebhookOakestraNetwork) unregisterService(systemJobID string) {
-	url := oaknet.custerInfo.rootServiceManagerURL + "/api/net/service/" + systemJobID
+	url := oaknet.ClusterInfo.RootServiceManagerURL + "/api/net/service/" + systemJobID
 	sendDeleteRequest(url)
 
 }
 
 func (oaknet *WebhookOakestraNetwork) deployInstance(systemJobID string) {
 	data := SystemJob{
-		ClusterID:      oaknet.custerInfo.clusterID,
+		ClusterID:      oaknet.ClusterInfo.ClusterID,
 		InstanceNumber: 0,
 		SystemJobID:    systemJobID,
 	}
@@ -74,7 +56,7 @@ func (oaknet *WebhookOakestraNetwork) deployInstance(systemJobID string) {
 		return
 	}
 
-	url := oaknet.custerInfo.rootServiceManagerURL + "/api/net/instance/deploy"
+	url := oaknet.ClusterInfo.RootServiceManagerURL + "/api/net/instance/deploy"
 	sendPostRequestToRootServiceManager(jsonData, url)
 }
 
@@ -130,11 +112,11 @@ func (oaknet *WebhookOakestraNetwork) Handle(ctx context.Context, req admission.
 			return admission.Errored(http.StatusBadRequest, err)
 		}
 
-		oakestraNetwork, err := oaknet.hasOakestraNetworkandPortLabel(pod)
+		hasOakestraNetworkPort, err := oaknet.hasOakestraPortLabel(pod)
 		if err != nil {
 			admission.Errored(http.StatusInternalServerError, err)
 		}
-		if oakestraNetwork {
+		if hasOakestraNetworkPort {
 			oaknet.connectToOakestraNetwork(pod)
 		}
 
@@ -149,16 +131,12 @@ func (oaknet *WebhookOakestraNetwork) Handle(ctx context.Context, req admission.
 
 }
 
-func (a *WebhookOakestraNetwork) hasOakestraNetworkandPortLabel(pod *corev1.Pod) (bool, error) {
-
-	networkActive := pod.Labels["oakestra.io/network"] == "active"
-	_, portExists := pod.Labels["oakestra.io/port"]
-	if networkActive && !portExists {
-		return false, fmt.Errorf("label oakestra.io/port not set")
+func (a *WebhookOakestraNetwork) hasOakestraPortLabel(pod *corev1.Pod) (bool, error) {
+	portValue, portExists := pod.Labels["oakestra.io/port"]
+	if !portExists || portValue == "" {
+		return false, fmt.Errorf("label oakestra.io/port is not set or empty")
 	}
-
-	return networkActive, nil
-
+	return true, nil
 }
 
 func sendPostRequestToRootServiceManager(jsonData []byte, url string) {
@@ -216,7 +194,7 @@ func (a *WebhookOakestraNetwork) registerService(systemJobID string, pod *corev1
 		return
 	}
 
-	url := a.custerInfo.rootServiceManagerURL + "/api/net/service/deploy"
+	url := a.ClusterInfo.RootServiceManagerURL + "/api/net/service/deploy"
 	sendPostRequestToRootServiceManager(jsonData, url)
 }
 
