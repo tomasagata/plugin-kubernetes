@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: controller-manager
+  namespace: system
+spec:
+  template:
+    spec:
+      containers:
+      - name: manager
+        env:
+        - name: OAKESTRA_ROOT_NETWORK_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: oakestra-cluster-info
+              key: OAKESTRA_ROOT_NETWORK_PORT
+        - name: CLUSTER_ID
+          valueFrom:
+            configMapKeyRef:
+              name: oakestra-cluster-info
+              key: CLUSTER_ID
+        - name: OAKESTRA_ROOT_IP
+          valueFrom:
+            configMapKeyRef:
+              name: oakestra-cluster-info
+              key: OAKESTRA_ROOT_IP

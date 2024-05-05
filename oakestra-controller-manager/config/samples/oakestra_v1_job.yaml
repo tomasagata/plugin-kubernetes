@@ -1,0 +1,12 @@
+apiVersion: oakestra.oakestra.kubernetes/v1
+kind: OakestraJob
+metadata:
+  labels:
+    app.kubernetes.io/name: OakestraJob
+    app.kubernetes.io/instance: OakestraJob-sample
+    app.kubernetes.io/part-of: oakestra-OakestraJob-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: oakestra-OakestraJob-operator
+  name: OakestraJob-sample
+spec:
+  # TODO(user): Add fields here
