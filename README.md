@@ -37,6 +37,8 @@ To use two CNIs per container, Multus is required. The following commands must b
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset.yml
 
+kubectl create namespace oakestra-system
+
 kubectl apply -f oakestra-network/Deployment/oakestra-cni/oakesta-cni.yaml -n oakestra-system
 ```
 
@@ -50,6 +52,10 @@ kubectl apply -f oakestra-network/Deployment/oakestra-cluster-service-manager/mo
 
 kubectl apply -f oakestra-network/Deployment/oakestra-cluster-service-manager/mongodb/ -n oakestra-system
 
+```
+
+**Check ReadMe for Oakestra Cluster Service Manager**
+```bash
 kubectl apply -f oakestra-network/Deployment/oakestra-cluster-service-manager/oakestra-cluster-service-manager.yaml -n oakestra-system
 ```
 
@@ -57,7 +63,10 @@ kubectl apply -f oakestra-network/Deployment/oakestra-cluster-service-manager/oa
 This component must also run on all nodes; it is responsible for ensuring that the containers in Kubernetes find the correct routing.
 
 ```bash
-kubectl apply -f oakestra-agent/Deployment/oakestra-agent.yaml -n oakestra-system
+
+kubectl set env daemonset/calico-node -n kube-system IP_AUTODETECTION_METHOD="skip-interface=goProxy.*"
+
+kubectl apply -f oakestra-network/Deployment/oakestra-nodenetmanager/node-netmanager.yaml -n oakestra-system
 ```
 
 
@@ -68,7 +77,7 @@ The following Kubernetes deployment must be initiated:
 
 
 ```bash
-kubectl apply -f oakestra-agent/Deployment/oakestra-agent.yaml -n oakestra-system
+kubectl apply -f oakestra-agent/Deployment/oakestra-agent.yaml
 ```
 
 

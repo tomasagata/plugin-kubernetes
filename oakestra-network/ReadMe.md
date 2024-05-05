@@ -31,9 +31,9 @@ The **MQTT_BROKER_URL** and **CLUSTER_MONGO_URL** need to be configured. These v
 | MY_PORT                     | 10110                  | Local port which starts server  |
 | MQTT_BROKER_PORT            | 10003                  |       -       |
 | MQTT_BROKER_URL             | *Needs to be set*        |  ClusterIP of Mosquitto Service     |
-| ROOT_SERVICE_MANAGER_URL    | 192.168.123.225        |    IP Oakestra Root Network          |
+| ROOT_SERVICE_MANAGER_URL    | *Needs to be set*       |    IP Oakestra Root Network          |
 | ROOT_SERVICE_MANAGER_PORT   | 10099                  |   Port Oakestra Root Network            |
-| SYSTEM_MANAGER_URL          | 192.168.123.225        |     IP Oakestra Root         |
+| SYSTEM_MANAGER_URL          | *Needs to be set*       |     IP Oakestra Root         |
 | SYSTEM_MANAGER_PORT         | 10000                  |    Port Oakestra Root          |
 | CLUSTER_MONGO_URL           | *Needs to be set*         |   ClusterIP of MongoDB Service    |
 | CLUSTER_MONGO_PORT          | 27017                  |        -      |

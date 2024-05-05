@@ -23,7 +23,7 @@ spec:
         - containerPort: 80
         env:
         - name: ROOT_SYSTEM_MANAGER_IP
-          value: "192.168.123.225"
+          value: ""
         - name: ROOT_SYSTEM_MANAGER_PORT
           value: "10000"
         - name: ROOT_SERIVCE_MANAGER_PORT
