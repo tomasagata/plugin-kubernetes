@@ -233,7 +233,7 @@ func aggregateNodeInfo(k8sClient k8sclient.KubernetesClient) (ClusterInfo, error
 		CPUCores:             cumulativeCPUCores,
 		CumulativeMemoryInMB: cumulativeMemoryInMb,
 		MemoryPercent:        cumulativeMemory,
-		NumberOfNodes:        2,
+		NumberOfNodes:        numberOfActiveNodes,
 		Virtualization:       technology,
 		More:                 0,
 		Jobs:                 jobs,
