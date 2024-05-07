@@ -35,17 +35,17 @@ spec:
         - name: MQTT_BROKER_PORT
           value: "10003"
         - name: MQTT_BROKER_URL
-          value: ""
+          value: "10.106.240.155"
         - name: ROOT_SERVICE_MANAGER_URL
-          value: ""
+          value: "10.100.253.175"
         - name: ROOT_SERVICE_MANAGER_PORT
           value: "10099"
         - name: SYSTEM_MANAGER_URL
-          value: ""
+          value: "10.100.253.175"
         - name: SYSTEM_MANAGER_PORT
           value: "10000"
         - name: CLUSTER_MONGO_URL
-          value: ""
+          value: "10.106.233.73" 
         - name: CLUSTER_MONGO_PORT
           value: "27017"
 ---

@@ -23,7 +23,7 @@ spec:
         - containerPort: 80
         env:
         - name: ROOT_SYSTEM_MANAGER_IP
-          value: ""
+          value: "10.100.253.175"
         - name: ROOT_SYSTEM_MANAGER_PORT
           value: "10000"
         - name: ROOT_SERIVCE_MANAGER_PORT
@@ -41,7 +41,7 @@ spec:
         - name: CLUSTER_SERVICE_MANAGER_PORT
           value: "30330"
         - name: CLUSTER_SERVICE_MANAGER_IP
-          value: "localhost" 
+          value: "10.100.253.19" 
           # Set to 'localhost' since this is a NodePort service
 
 

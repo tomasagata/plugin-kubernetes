@@ -8,6 +8,7 @@ All these components must be installed on the Kubernetes cluster.
 
 - [plugin-kubernetes](#plugin-kubernetes)
     - [0. Prerequisites](#0-prerequisites)
+      - [1.1 Create Namespaces in Kubernetes](#11-create-namespaces-in-kubernetes)
     - [2. Oakestra Network](#2-oakestra-network)
       - [1.1 Oakestra CNI](#11-oakestra-cni)
       - [1.2 Multus CNI](#12-multus-cni)
@@ -24,6 +25,14 @@ All these components must be installed on the Kubernetes cluster.
 ### 0. Prerequisites
 For the integration of Kubernetes with Oakestra, a few prerequisites must be met beforehand. Firstly, there must be an existing Kubernetes cluster with kubectl access. Secondly, all nodes of the Kubernetes cluster must be able to communicate with all nodes of [Oakestra](https://github.com/oakestra). Moreover, a default CNI (e.g., Calico) is required. Lastly, an Oakestra Root server must be operational to facilitate this integration.
 
+#### 1.1 Create Namespaces in Kubernetes
+
+```bash
+kubectl create namespace oakestra-system
+
+kubectl create namespace oakestra
+```
+
 
 ### 2. Oakestra Network
 
@@ -36,8 +45,6 @@ To use two CNIs per container, Multus is required. The following commands must b
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset.yml
-
-kubectl create namespace oakestra-system
 
 kubectl apply -f oakestra-network/Deployment/oakestra-cni/oakesta-cni.yaml -n oakestra-system
 ```
@@ -85,6 +92,12 @@ kubectl apply -f oakestra-agent/Deployment/oakestra-agent.yaml
 This controller-manager is responsible for deploying the appropriate resources in Kubernetes for Oakestra.
 
 The following commands must be executed:
+
+
+CertManager muss auch installiert werden: 
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.5/cert-manager.yaml
+https://cert-manager.io/docs/installation/
+
 
 ```bash
 cd oakestra-controller-manager

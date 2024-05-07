@@ -101,7 +101,7 @@ func main() {
 	flag.Parse()
 
 	c, _ := kubenetesclient.NewKubernetesClient()
-	hostIP, err := c.GetHostIP() // hostIP := "192.168.123.196"
+	hostIP, err := c.GetHostIP()
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "failed to load hostip"))
 	}
