@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-oakestra
+  namespace: oakestra-system
+  labels:
+    app: nginx
+    oakestra.io/network: active
+    oakestra.io/port: "80"    
+spec:
+  containers:
+  - name: curl
+    image: alpine:latest
+    command: ["sh"]
+    args: ["-c", "sleep 300"]

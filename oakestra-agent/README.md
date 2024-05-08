@@ -21,7 +21,7 @@ For the deployment of the component, a Kubernetes deployment simply needs to be 
 | MY_PORT                         | 10100               | Local port which starts server                                  |
 | NODE_PORT                       | 30000               | Exposed public port to Root, needs to be in range 30000-32767   |
 | CLUSTER_SERVICE_MANAGER_PORT    | 30330               | NodePort for Cluster Service Manager                            |
-| CLUSTER_SERVICE_MANAGER_IP      | localhost           | Node IP for Cluster Service Manager                             |
+| CLUSTER_SERVICE_MANAGER_IP      | *Needs to be set*           | Node IP of any kubernetes node                           |
 
 
 

@@ -94,9 +94,8 @@ This controller-manager is responsible for deploying the appropriate resources i
 The following commands must be executed:
 
 
-CertManager muss auch installiert werden: 
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.5/cert-manager.yaml
-https://cert-manager.io/docs/installation/
+**Certmanager must be installed for this.** 
+The current documentation can be found [here](https://cert-manager.io/docs/installation/). 
 
 
 ```bash

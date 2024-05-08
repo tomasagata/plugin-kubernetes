@@ -241,9 +241,9 @@ func (r *OakestraJobReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	for _, deployment := range deployments.Items {
-		instanceNumberStr, found := deployment.Labels["InstanceNumber"]
+		instanceNumberStr, found := deployment.Labels["instanceNumber"]
 		if !found {
-			log.Error(fmt.Errorf("deployment %s/%s is missing 'instance-number' label", deployment.Namespace, deployment.Name), "")
+			log.Error(fmt.Errorf("deployment %s/%s is missing 'instanceNumber' label", deployment.Namespace, deployment.Name), "")
 			continue
 		}
 

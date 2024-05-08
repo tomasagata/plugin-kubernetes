@@ -18,7 +18,7 @@ Für den [Nodenetmanager](Deployment/oakestra-nodenetmanager/node-netmanager.yam
 |---------------------------------|---------------------|-----------------------------------------------------------------|
 | NODE_PORT          | 50103     | public node port for oakestra network                                                |
 | MOSQUITTO_SVC_SERVICE_PORT       | 30033               | -                                             |
-| MOSQUITTO_SVC_SERVICE_HOST       | localhost               | NodePort, accesible through localhost
+| MOSQUITTO_SVC_SERVICE_HOST       | *Needs to be set*               | NodePort of one kubernetes node
 
 
 Für den [Cluster Service Manager](Deployment/oakestra-cluster-service-manager/oakestra-cluster-service-manager.yaml) müssen diese Variablen gesetzt werden. 
