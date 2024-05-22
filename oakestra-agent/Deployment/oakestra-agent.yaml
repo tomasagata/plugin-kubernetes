@@ -17,7 +17,7 @@ spec:
       serviceAccountName: oakestra-agent
       containers:
       - name: oakestra-agent
-        image: ghcr.io/jakobke/oakestra-agent:1.2-amd
+        image: ghcr.io/jakobke/oakestra-agent:1.0
         imagePullPolicy: Always
         ports:
         - containerPort: 80
