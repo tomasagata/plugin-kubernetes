@@ -31,6 +31,8 @@ For the integration of Kubernetes with Oakestra, a few prerequisites must be met
 kubectl create namespace oakestra-system
 
 kubectl create namespace oakestra
+
+kubectl create namespace oakestra-controller-manager
 ```
 
 
@@ -46,7 +48,7 @@ To use two CNIs per container, Multus is required. The following commands must b
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset.yml
 
-kubectl apply -f oakestra-network/Deployment/oakestra-cni/oakesta-cni.yaml -n oakestra-system
+kubectl apply -f oakestra-network/Deployment/oakestra-cni/oakesta-cni.yaml -n oakestra
 ```
 
 

@@ -93,6 +93,22 @@ func (r *OakestraJobReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	getEnvVariables := func() []corev1.EnvVar {
+		var envVars []corev1.EnvVar
+
+		for _, variable := range oakestraJob.Spec.Environment {
+			parts := strings.SplitN(variable, "=", 2)
+			if len(parts) == 2 {
+
+				envVars = append(envVars, corev1.EnvVar{Name: parts[0], Value: parts[1]})
+			} else {
+				log.Info("ENV Variable could not be decoded: ", variable)
+			}
+		}
+
+		return envVars
+	}
+
 	updateInstanceInformation := func(instance *oakestrav1.Instance) {
 		selector := labels.SelectorFromSet(labels.Set(map[string]string{"MicroserviceID": oakestraJob.Spec.MicroserviceID}))
 		pods := &corev1.PodList{}
@@ -174,6 +190,7 @@ func (r *OakestraJobReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 				Name:    oakestraJob.Spec.MicroserviceName,
 				Image:   oakestraJob.Spec.Image,
 				Command: oakestraJob.Spec.Cmd,
+				Env:     getEnvVariables(),
 			},
 		}
 

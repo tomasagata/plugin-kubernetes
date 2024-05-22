@@ -44,8 +44,7 @@ spec:
         - name: MOSQUITTO_SVC_SERVICE_PORT
           value: "30033"
         - name: MOSQUITTO_SVC_SERVICE_HOST
-          value: "" 
-          # Set to 'localhost' since this is a NodePort service
+          value: "10.100.252.133" 
       volumes:
       - name: host-more
         hostPath:

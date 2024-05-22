@@ -66,6 +66,11 @@ spec:
               disk:
                 description: Represents the disk size what is needed
                 type: integer
+              environment:
+                description: Env contains the environment variables for the service.
+                items:
+                  type: string
+                type: array
               image:
                 description: Image which is used by the container
                 type: string
