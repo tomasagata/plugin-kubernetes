@@ -183,6 +183,8 @@ func (r *OakestraJobReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			"oakestraPort":                oakestraJob.Spec.Port,
 		}
 
+		// replicaCount := int32(10)
+		// deployment.Spec.Replicas = &replicaCount
 		deployment.Spec.Template.Spec.RestartPolicy = corev1.RestartPolicyAlways
 
 		deployment.Spec.Template.Spec.Containers = []corev1.Container{
