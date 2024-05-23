@@ -44,7 +44,7 @@ spec:
         - name: MOSQUITTO_SVC_SERVICE_PORT
           value: "30033"
         - name: MOSQUITTO_SVC_SERVICE_HOST
-          value: "10.100.252.133" 
+          value: "10.100.254.89" 
       volumes:
       - name: host-more
         hostPath:

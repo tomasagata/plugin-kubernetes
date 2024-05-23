@@ -287,7 +287,7 @@ func (env *Environment) setIPv6ContainerRoutes(containerPid int, netnsPath strin
 		if err != nil {
 			return err
 		}
-		dstv6, err := netlink.ParseIPNet("fdff:2000::")
+		dstv6, err := netlink.ParseIPNet("fdff:2000::/21")
 		if err != nil {
 			return err
 		}

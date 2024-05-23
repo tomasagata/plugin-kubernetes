@@ -68,9 +68,9 @@ func getPortInformation(podName string) (string, error) {
 
 	for _, pod := range pods.Items {
 		if pod.Name == podName {
-			oakestraPort, ok := pod.Annotations["oakestraPort"]
+			oakestraPort, ok := pod.Annotations["oakestra.io/port"]
 			if !ok {
-				return "", fmt.Errorf("annotation 'oakestraPort' not found on pod %s in namespace %s", podName, pod.Namespace)
+				return "", fmt.Errorf("annotation 'oakestra.io/port' not found on pod %s in namespace %s", podName, pod.Namespace)
 			}
 			return oakestraPort, nil
 		}
@@ -125,6 +125,7 @@ func (m *ContainerManager) containerDeploy(writer http.ResponseWriter, request *
 	deployTask.PortMappings, err = getPortInformation(k8sdeployTask.Podname)
 	if err != nil {
 		logger.InfoLogger().Println("Could not retrieve Port Information of Pod")
+		logger.InfoLogger().Println(err)
 		writer.WriteHeader(http.StatusInternalServerError)
 	}
 
@@ -135,7 +136,7 @@ func (m *ContainerManager) containerDeploy(writer http.ResponseWriter, request *
 	deployTask.Writer = &writer
 	deployTask.Finish = make(chan TaskReady)
 
-	logger.DebugLogger().Println(deployTask)
+	logger.InfoLogger().Println(deployTask)
 	NewDeployTaskQueue().NewTask(&deployTask)
 
 	result := <-deployTask.Finish

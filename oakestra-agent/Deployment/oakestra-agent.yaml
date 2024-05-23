@@ -41,7 +41,7 @@ spec:
         - name: CLUSTER_SERVICE_MANAGER_PORT
           value: "30330"
         - name: CLUSTER_SERVICE_MANAGER_IP
-          value: "10.100.252.133" 
+          value: "10.100.254.89" 
           # Set to 'localhost' since this is a NodePort service
 
 
