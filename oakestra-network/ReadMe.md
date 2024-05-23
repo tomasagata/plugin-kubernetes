@@ -18,7 +18,7 @@ Für den [Nodenetmanager](Deployment/oakestra-nodenetmanager/node-netmanager.yam
 |---------------------------------|---------------------|-----------------------------------------------------------------|
 | NODE_PORT          | 50103     | public node port for oakestra network                                                |
 | MOSQUITTO_SVC_SERVICE_PORT       | 30033               | -                                             |
-| MOSQUITTO_SVC_SERVICE_HOST       | localhost               | NodePort, accesible through localhost
+| MOSQUITTO_SVC_SERVICE_HOST       | *Needs to be set*               | NodePort of one kubernetes node
 
 
 Für den [Cluster Service Manager](Deployment/oakestra-cluster-service-manager/oakestra-cluster-service-manager.yaml) müssen diese Variablen gesetzt werden. 
@@ -31,9 +31,9 @@ The **MQTT_BROKER_URL** and **CLUSTER_MONGO_URL** need to be configured. These v
 | MY_PORT                     | 10110                  | Local port which starts server  |
 | MQTT_BROKER_PORT            | 10003                  |       -       |
 | MQTT_BROKER_URL             | *Needs to be set*        |  ClusterIP of Mosquitto Service     |
-| ROOT_SERVICE_MANAGER_URL    | 192.168.123.225        |    IP Oakestra Root Network          |
+| ROOT_SERVICE_MANAGER_URL    | *Needs to be set*       |    IP Oakestra Root Network          |
 | ROOT_SERVICE_MANAGER_PORT   | 10099                  |   Port Oakestra Root Network            |
-| SYSTEM_MANAGER_URL          | 192.168.123.225        |     IP Oakestra Root         |
+| SYSTEM_MANAGER_URL          | *Needs to be set*       |     IP Oakestra Root         |
 | SYSTEM_MANAGER_PORT         | 10000                  |    Port Oakestra Root          |
 | CLUSTER_MONGO_URL           | *Needs to be set*         |   ClusterIP of MongoDB Service    |
 | CLUSTER_MONGO_PORT          | 27017                  |        -      |

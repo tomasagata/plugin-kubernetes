@@ -111,6 +111,9 @@ type OakestraJobSpec struct {
 	// Represents the disk size what is needed
 	Disk int `json:"disk,omitempty"`
 
+	// Env contains the environment variables for the service.
+	Environment []string `json:"environment,omitempty"`
+
 	//
 	// Optional Specs
 	//
@@ -123,9 +126,6 @@ type OakestraJobSpec struct {
 
 	// // Contains additional arguments for the service.
 	// --group oakestra --version v1 --kind OakestraJob []string `json:"args,omitempty"`
-
-	// // Env contains the environment variables for the service.
-	// Env []string `json:"environment,omitempty"`
 
 	// // UnikernelImages contains the list of unikernel images used by the service.
 	// UnikernelImages []string `json:"vm_images,omitempty"`

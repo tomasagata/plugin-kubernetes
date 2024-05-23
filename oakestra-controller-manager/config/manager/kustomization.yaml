@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: ghcr.io/jakobke/oakestra-controller
-  newTag: "2.3"
+  newTag: "1.0"

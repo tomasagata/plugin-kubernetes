@@ -17,13 +17,13 @@ spec:
       serviceAccountName: oakestra-agent
       containers:
       - name: oakestra-agent
-        image: ghcr.io/jakobke/oakestra-agent:1.0-amd
+        image: ghcr.io/jakobke/oakestra-agent:1.0
         imagePullPolicy: Always
         ports:
         - containerPort: 80
         env:
         - name: ROOT_SYSTEM_MANAGER_IP
-          value: "192.168.123.225"
+          value: "10.100.253.57"
         - name: ROOT_SYSTEM_MANAGER_PORT
           value: "10000"
         - name: ROOT_SERIVCE_MANAGER_PORT
@@ -41,7 +41,7 @@ spec:
         - name: CLUSTER_SERVICE_MANAGER_PORT
           value: "30330"
         - name: CLUSTER_SERVICE_MANAGER_IP
-          value: "localhost" 
+          value: "10.100.254.89" 
           # Set to 'localhost' since this is a NodePort service
 
 

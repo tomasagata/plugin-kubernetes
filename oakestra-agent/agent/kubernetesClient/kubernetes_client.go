@@ -44,6 +44,7 @@ type OakestraJSONRequest struct {
 	Disk                          int                   `json:"disk"`
 	Virtualization                string                `json:"virtualization"`
 	VTPUs                         int                   `json:"vtpus"`
+	Environment                   []string              `json:"environment"`
 }
 
 type InstanceJSONRequest struct {
@@ -216,6 +217,7 @@ func createOakestraJobStructFromBody(jsonRequest OakestraJSONRequest) OakestraJo
 			VTPUs:                         jsonRequest.VTPUs,
 			Disk:                          jsonRequest.Disk,
 			InstanceList:                  jsonRequest.InstanceList,
+			Environment:                   jsonRequest.Environment,
 		},
 	}
 
@@ -361,6 +363,7 @@ func convertOakestraJobToUnstructured(oakestraJob OakestraJob) *unstructured.Uns
 				"status_detail":                    oakestraJob.Spec.StatusDetail,
 				"disk":                             oakestraJob.Spec.Disk,
 				"instance_list":                    convertInstanceDetailsToUnstructured(oakestraJob.Spec.InstanceList),
+				"environment":                      oakestraJob.Spec.Environment,
 			},
 		},
 	}

@@ -22,16 +22,17 @@ import (
 )
 
 type ClusterInfo struct {
-	CPUPercent                 int      `json:"cpu_percent"`
-	CPUCores                   int      `json:"cpu_cores"`
-	CumulativeMemoryInMB       int      `json:"cumulative_memory_in_mb"`
-	MemoryPercent              int      `json:"memory_percent"`
-	NumberOfNodes              int      `json:"number_of_nodes"`
-	Virtualization             []string `json:"virtualization"`
-	More                       int      `json:"more"`
-	Jobs                       []Job    `json:"jobs"`
-	WorkerGroups               string   `json:"worker_groups"`
-	AggregationPerArchitecture []Arch   `json:"aggregation_per_architecture"`
+	CPUPercent           float32  `json:"cpu_percent"`
+	CPUCores             int      `json:"cpu_cores"`
+	CumulativeMemoryInMB int      `json:"cumulative_memory_in_mb"`
+	MemoryPercent        int      `json:"memory_percent"`
+	NumberOfNodes        int      `json:"number_of_nodes"`
+	Virtualization       []string `json:"virtualization"`
+	More                 int      `json:"more"`
+	Jobs                 []Job    `json:"jobs"`
+	WorkerGroups         string   `json:"worker_groups"`
+
+	AggregationPerArchitecture map[string]AggArchitecture `json:"aggregation_per_architecture"`
 
 	// Not used, no GPU support so far.
 	GPUCores   int      `json:"gpu_cores"`
@@ -47,10 +48,10 @@ type Arch struct {
 	AMD AggArchitecture `json:"amd"`
 }
 type AggArchitecture struct {
-	CPUPercent int `json:"cpu_percent"`
-	CPUCores   int `json:"cpu_cores"`
-	Memory     int `json:"memory"`
-	MemoryInMB int `json:"memory_in_mb"`
+	CPUPercent float32 `json:"cpu_percent"`
+	CPUCores   int     `json:"cpu_cores"`
+	Memory     int     `json:"memory"`
+	MemoryInMB int     `json:"memory_in_mb"`
 }
 
 type Job struct {
@@ -181,7 +182,7 @@ func StartBackgroundServiceClusterInformation(timeInterval time.Duration,
 }
 
 func aggregateNodeInfo(k8sClient k8sclient.KubernetesClient) (ClusterInfo, error) {
-	cumulativeCPU := 0
+	var cumulativeCPU float32 = 0.0
 	cumulativeCPUCores := 0
 	cumulativeMemory := 0
 	cumulativeMemoryInMb := 0
@@ -217,7 +218,7 @@ func aggregateNodeInfo(k8sClient k8sclient.KubernetesClient) (ClusterInfo, error
 		// }
 
 		cumulativeMemoryInMb += int(freeMemoryInMb)
-		cumulativeCPU += int(percentageUsageCPU * 100)
+		cumulativeCPU += percentageUsageCPU * 100
 		cumulativeCPUCores += int(freeCPUCore)
 		cumulativeMemory += int(percentageUsageMemory * 100)
 		numberOfActiveNodes++
@@ -233,19 +234,18 @@ func aggregateNodeInfo(k8sClient k8sclient.KubernetesClient) (ClusterInfo, error
 		CPUCores:             cumulativeCPUCores,
 		CumulativeMemoryInMB: cumulativeMemoryInMb,
 		MemoryPercent:        cumulativeMemory,
-		NumberOfNodes:        2,
+		NumberOfNodes:        numberOfActiveNodes,
 		Virtualization:       technology,
 		More:                 0,
 		Jobs:                 jobs,
 
 		// So far only amd is supported.
-		AggregationPerArchitecture: []Arch{
-			{AMD: AggArchitecture{
+		AggregationPerArchitecture: map[string]AggArchitecture{
+			"amd": {
 				CPUPercent: cumulativeCPU,
 				CPUCores:   cumulativeCPUCores,
 				Memory:     cumulativeMemory,
 				MemoryInMB: cumulativeMemoryInMb},
-			},
 		},
 
 		// Default values to 0

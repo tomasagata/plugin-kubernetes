@@ -263,9 +263,6 @@ func (env *Environment) setContainerRoutes(containerPid int, netnsPath string, p
 		if err != nil {
 			return err
 		}
-		//dst, err := netlink.ParseIPNet("0.0.0.0/0") // TODO Das war davor - darf nicht mehr, weil es bereits deine default route gibt
-		// TODO Es muss ein oakestra netzwerk bestimmt werden
-		// Vielleicht noch so erweitern, dass gecheckt wird, ob es ein zweites CNI gibt?
 		dst, err := netlink.ParseIPNet("10.30.0.0/16")
 		if err != nil {
 			return err
@@ -290,7 +287,7 @@ func (env *Environment) setIPv6ContainerRoutes(containerPid int, netnsPath strin
 		if err != nil {
 			return err
 		}
-		dstv6, err := netlink.ParseIPNet("::/0") // TODO - hier muss ich auch auf jeden Fall noch eine andere IP reinschreiben.
+		dstv6, err := netlink.ParseIPNet("fdff:2000::/21")
 		if err != nil {
 			return err
 		}

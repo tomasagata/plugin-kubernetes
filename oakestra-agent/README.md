@@ -12,7 +12,7 @@ For the deployment of the component, a Kubernetes deployment simply needs to be 
 
 | Variable Name                   | Default Values      | Description                                                     |
 |---------------------------------|---------------------|-----------------------------------------------------------------|
-| ROOT_SYSTEM_MANAGER_IP          | 192.168.123.225     | IP Oakestra Root                                                |
+| ROOT_SYSTEM_MANAGER_IP          | *Needs to be set*      | IP Oakestra Root                                                |
 | ROOT_SYSTEM_MANAGER_PORT        | 10000               | Port Oakestra Root                                              |
 | ROOT_SERVICE_MANAGER_PORT       | 10099               | Port Oakestra Network Root                                      |
 | ROOT_GRPC_PORT                  | 50052               | Port GRPC Root                                                  |
@@ -21,7 +21,7 @@ For the deployment of the component, a Kubernetes deployment simply needs to be 
 | MY_PORT                         | 10100               | Local port which starts server                                  |
 | NODE_PORT                       | 30000               | Exposed public port to Root, needs to be in range 30000-32767   |
 | CLUSTER_SERVICE_MANAGER_PORT    | 30330               | NodePort for Cluster Service Manager                            |
-| CLUSTER_SERVICE_MANAGER_IP      | localhost           | Node IP for Cluster Service Manager                             |
+| CLUSTER_SERVICE_MANAGER_IP      | *Needs to be set*           | Node IP of any kubernetes node                           |
 
 
 

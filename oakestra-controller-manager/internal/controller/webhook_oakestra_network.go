@@ -112,7 +112,7 @@ func (oaknet *WebhookOakestraNetwork) Handle(ctx context.Context, req admission.
 			return admission.Errored(http.StatusBadRequest, err)
 		}
 
-		hasOakestraNetworkPort, err := oaknet.hasOakestraPortLabel(pod)
+		hasOakestraNetworkPort, err := oaknet.hasOakestraPortAnnotation(pod)
 		if err != nil {
 			admission.Errored(http.StatusInternalServerError, err)
 		}
@@ -131,10 +131,10 @@ func (oaknet *WebhookOakestraNetwork) Handle(ctx context.Context, req admission.
 
 }
 
-func (a *WebhookOakestraNetwork) hasOakestraPortLabel(pod *corev1.Pod) (bool, error) {
-	portValue, portExists := pod.Labels["oakestra.io/port"]
+func (a *WebhookOakestraNetwork) hasOakestraPortAnnotation(pod *corev1.Pod) (bool, error) {
+	portValue, portExists := pod.Annotations["oakestra.io/port"]
 	if !portExists || portValue == "" {
-		return false, fmt.Errorf("label oakestra.io/port is not set or empty")
+		return false, fmt.Errorf("annotation oakestra.io/port is not set or empty")
 	}
 	return true, nil
 }
@@ -169,12 +169,14 @@ func sendPostRequestToRootServiceManager(jsonData []byte, url string) {
 func (a *WebhookOakestraNetwork) registerService(systemJobID string, pod *corev1.Pod) {
 
 	descriptor := DeploymentDescriptorNetwork{
-		ApplicationID:    systemJobID,
-		AppName:          pod.Name,
-		AppNamespace:     pod.Namespace,
-		ServiceName:      pod.Name,
-		ServiceNamespace: pod.Namespace,
-		Image:            pod.Spec.Containers[0].Image,
+		ApplicationID:        systemJobID,
+		AppName:              pod.Name,
+		AppNamespace:         pod.Namespace,
+		ServiceName:          pod.Name,
+		ServiceNamespace:     pod.Namespace,
+		MicroserviceName:     pod.Name,
+		MicroserviceNamepace: pod.Namespace,
+		Image:                pod.Spec.Containers[0].Image,
 
 		InstanceList:                  []Instance{},
 		Virtualization:                "docker",
@@ -225,13 +227,15 @@ func sendDeleteRequest(url string) {
 }
 
 type DeploymentDescriptorNetwork struct {
-	ApplicationID    string     `json:"applicationID"`
-	AppName          string     `json:"app_name"`
-	AppNamespace     string     `json:"app_ns"`
-	ServiceName      string     `json:"service_name"`
-	ServiceNamespace string     `json:"service_ns"`
-	Image            string     `json:"image"`
-	InstanceList     []Instance `json:"instance_list"`
+	ApplicationID        string     `json:"applicationID"`
+	AppName              string     `json:"app_name"`
+	AppNamespace         string     `json:"app_ns"`
+	ServiceName          string     `json:"service_name"`
+	ServiceNamespace     string     `json:"service_ns"`
+	MicroserviceName     string     `json:"microservice_name"`
+	MicroserviceNamepace string     `json:"microservice_namespace"`
+	Image                string     `json:"image"`
+	InstanceList         []Instance `json:"instance_list"`
 
 	Virtualization                string `json:"virtualization"`
 	Memory                        int    `json:"memory"`

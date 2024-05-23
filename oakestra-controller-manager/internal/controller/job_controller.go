@@ -93,6 +93,22 @@ func (r *OakestraJobReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	getEnvVariables := func() []corev1.EnvVar {
+		var envVars []corev1.EnvVar
+
+		for _, variable := range oakestraJob.Spec.Environment {
+			parts := strings.SplitN(variable, "=", 2)
+			if len(parts) == 2 {
+
+				envVars = append(envVars, corev1.EnvVar{Name: parts[0], Value: parts[1]})
+			} else {
+				log.Info("ENV Variable could not be decoded: ", variable)
+			}
+		}
+
+		return envVars
+	}
+
 	updateInstanceInformation := func(instance *oakestrav1.Instance) {
 		selector := labels.SelectorFromSet(labels.Set(map[string]string{"MicroserviceID": oakestraJob.Spec.MicroserviceID}))
 		pods := &corev1.PodList{}
@@ -167,6 +183,8 @@ func (r *OakestraJobReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			"oakestraPort":                oakestraJob.Spec.Port,
 		}
 
+		// replicaCount := int32(10)
+		// deployment.Spec.Replicas = &replicaCount
 		deployment.Spec.Template.Spec.RestartPolicy = corev1.RestartPolicyAlways
 
 		deployment.Spec.Template.Spec.Containers = []corev1.Container{
@@ -174,6 +192,7 @@ func (r *OakestraJobReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 				Name:    oakestraJob.Spec.MicroserviceName,
 				Image:   oakestraJob.Spec.Image,
 				Command: oakestraJob.Spec.Cmd,
+				Env:     getEnvVariables(),
 			},
 		}
 
@@ -241,9 +260,9 @@ func (r *OakestraJobReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	for _, deployment := range deployments.Items {
-		instanceNumberStr, found := deployment.Labels["InstanceNumber"]
+		instanceNumberStr, found := deployment.Labels["instanceNumber"]
 		if !found {
-			log.Error(fmt.Errorf("deployment %s/%s is missing 'instance-number' label", deployment.Namespace, deployment.Name), "")
+			log.Error(fmt.Errorf("deployment %s/%s is missing 'instanceNumber' label", deployment.Namespace, deployment.Name), "")
 			continue
 		}
 
@@ -273,6 +292,16 @@ func (r *OakestraJobReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			return ctrl.Result{}, err
 		}
 	}
+
+	if len(InstanceList) == 0 {
+		if err := r.Delete(ctx, &oakestraJob); err != nil {
+			log.Error(err, "unable to delete Oakestra OakestraJob")
+			return ctrl.Result{}, err
+		}
+		log.Info("OakestraJob deleted")
+
+	}
+
 	return ctrl.Result{}, nil
 }
 
