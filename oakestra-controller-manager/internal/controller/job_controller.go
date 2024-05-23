@@ -290,6 +290,16 @@ func (r *OakestraJobReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			return ctrl.Result{}, err
 		}
 	}
+
+	if len(InstanceList) == 0 {
+		if err := r.Delete(ctx, &oakestraJob); err != nil {
+			log.Error(err, "unable to delete Oakestra OakestraJob")
+			return ctrl.Result{}, err
+		}
+		log.Info("OakestraJob deleted")
+
+	}
+
 	return ctrl.Result{}, nil
 }
 
