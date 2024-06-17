@@ -10,7 +10,7 @@ env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}/kubernetes-plugin/oakestra-controller-manager
+  IMAGE_NAME: ${{ github.repository }}/oakestra-controller-manager
 
 
 jobs:
@@ -68,7 +68,7 @@ jobs:
           platforms: all
 
       - name: Build and Push Kubebuilder Image
-        working-directory: ./cd oakestra-controller-manager
+        working-directory: oakestra-controller-manager
         run: make docker-build docker-push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       # Sign the resulting Docker image digest except on PRs.
