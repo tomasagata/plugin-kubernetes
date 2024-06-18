@@ -1,4 +1,5 @@
 FROM golang:alpine as builder
+LABEL org.opencontainers.image.source https://github.com/oakestra/oakestra
 
 WORKDIR /app
 COPY . .

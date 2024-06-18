@@ -1,5 +1,4 @@
 name: Docker oakestra-nodeNetManager
-LABEL org.opencontainers.image.source https://github.com/oakestra/oakestra
 
 on:
   push:
