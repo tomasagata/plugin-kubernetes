@@ -1,5 +1,5 @@
 FROM golang:alpine as builder
-LABEL org.opencontainers.image.source https://github.com/oakestra/oakestra
+LABEL org.opencontainers.image.source https://github.com/oakestra/plugin-kubernetes
 
 WORKDIR /app
 COPY . .

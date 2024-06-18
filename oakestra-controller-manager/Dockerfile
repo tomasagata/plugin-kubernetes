@@ -2,7 +2,7 @@
 FROM golang:1.20 as builder
 ARG TARGETOS
 ARG TARGETARCH
-LABEL org.opencontainers.image.source https://github.com/oakestra/oakestra
+LABEL org.opencontainers.image.source https://github.com/oakestra/plugin-kubernetes
 
 WORKDIR /workspace
 # Copy the Go Modules manifests
