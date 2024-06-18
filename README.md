@@ -105,6 +105,5 @@ cd oakestra-controller-manager
 
 make install
 
-//TODO  Not yet in oakestra cr.
-make deploy IMG=ghcr.io/oakestra/oakestra-controller:1.0 
+make deploy 
 ```

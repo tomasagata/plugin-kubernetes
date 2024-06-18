@@ -1,4 +1,5 @@
-name: Docker oakestra-agent
+name: Docker oakestra-nodeNetManager
+LABEL org.opencontainers.image.source https://github.com/oakestra/oakestra
 
 on:
   push:
@@ -10,7 +11,7 @@ env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}/kubernetes-plugin/oakestra-agent
+  IMAGE_NAME: ${{ github.repository }}/plugin-kubernetes/oakestra-nodenetmanager
 
 
 jobs:
@@ -73,7 +74,7 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@v3
         with:
-          context: ./oakestra-agent
+          context: ./oakestra-network/oakestra-nodeNetManager
           platforms: linux/amd64,linux/armhf,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
