@@ -1,4 +1,5 @@
 name: Docker oakestra-cni
+LABEL org.opencontainers.image.source https://github.com/oakestra/oakestra
 
 on:
   push:

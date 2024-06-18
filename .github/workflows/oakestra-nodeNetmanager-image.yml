@@ -1,4 +1,5 @@
 name: Docker oakestra-nodeNetManager
+LABEL org.opencontainers.image.source https://github.com/oakestra/oakestra
 
 on:
   push:
@@ -10,7 +11,7 @@ env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}/oakestra-nodenetmanager
+  IMAGE_NAME: ${{ github.repository }}/plugin-kubernetes/oakestra-nodenetmanager
 
 
 jobs:
