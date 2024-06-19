@@ -19,7 +19,7 @@ spec:
       hostNetwork: true
       containers:
       - name: node-netmanager
-        image: ghcr.io/jakobke/oakestra-net-manager:0.4-amd
+        image: ghcr.io/oakestra/plugin-kubernetes/plugin-kubernetes/oakestra-nodenetmanager:latest
         imagePullPolicy: Always
         command: ['sh', '-c', 'netmanager']
         ports:
@@ -57,7 +57,7 @@ spec:
           path: /
       initContainers:
       - name: init-cni-bin
-        image: ghcr.io/jakobke/oakestra-cni:1.0-amd
+        image: ghcr.io/oakestra/plugin-kubernetes/plugin-kubernetes/oakestra-cni:latest
         imagePullPolicy: Always
         command: ['sh', '-c', 'cp /app/oakestra /opt/cni/bin/']
         volumeMounts:
