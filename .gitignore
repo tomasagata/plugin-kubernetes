@@ -7,6 +7,7 @@
 *.dll
 *.so
 *.dylib
+oakestra-controller-manager/bin/*
 
 # Test binary, built with `go test -c`
 *.test
@@ -20,5 +21,5 @@
 # Go workspace file
 go.work
 
-
+# MacOS system files
 .DS_Store
