@@ -27,9 +27,18 @@ func init() {
 	// must ensure that the goroutine does not jump from OS thread to thread
 	runtime.LockOSThread()
 
-	logFilePath := "/home/ubuntu/cni_log.txt"
+	logDir := "/var/log/oakestra"
+	logFilePath := logDir + "/cni_log.txt"
 
-	// Öffne oder erstelle die Logdatei
+	// Create the log directory if it doesn't exist
+	err := os.MkdirAll(logDir, 0755)
+	if err != nil {
+		fmt.Printf("Fehler beim Erstellen des Verzeichnisses: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Open the log file for appending
+	// or create it if it doesn't exist
 	logFile, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Printf("Fehler beim Öffnen der Logdatei: %v\n", err)
