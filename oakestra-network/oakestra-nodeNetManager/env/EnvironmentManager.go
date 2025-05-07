@@ -17,7 +17,6 @@ import (
 	"sync"
 
 	"github.com/vishvananda/netlink"
-	"github.com/vishvananda/netns"
 )
 
 const NamespaceAlreadyDeclared string = "namespace already declared"
@@ -69,7 +68,7 @@ type service struct {
 	ipv6        net.IP
 	sname       string
 	portmapping string
-	veth        *netlink.Veth
+	veth        string
 }
 
 // current network interfaces in the system
@@ -193,46 +192,46 @@ func (env *Environment) ConfigureDockerNetwork(containername string) (string, er
 
 // create veth pair and connect one to the host bridge
 // returns: bridgeVeth name, free Veth name, Vether interface to the veth pair and eventually an error
-func (env *Environment) createVethsPairAndAttachToBridge(sname string, mtu int) (*netlink.Veth, error) {
+func (env *Environment) createVethsPairAndAttachToBridge(sname string, mtu int) (string, string) {
 	// Retrieve current bridge
-	logger.DebugLogger().Println("Retrieving current bridge ")
-	bridge, err := netlink.LinkByName(env.config.HostBridgeName)
-	if err != nil {
-		logger.ErrorLogger().Println("Error retrieving current bridge: ", err)
-		return nil, err
-	}
-	logger.DebugLogger().Println("Retrieved current bridge")
-	log.Println("Bridge: " + bridge.Attrs().Name)
+	// logger.DebugLogger().Println("Retrieving current bridge ")
+	// bridge, err := netlink.LinkByName(env.config.HostBridgeName)
+	// if err != nil {
+	// 	logger.ErrorLogger().Println("Error retrieving current bridge: ", err)
+	// 	return nil, err
+	// }
+	// logger.DebugLogger().Println("Retrieved current bridge")
+	// log.Println("Bridge: " + bridge.Attrs().Name)
 	hashedName := network.NameUniqueHash(sname, 4)
 	veth1name := fmt.Sprintf("veth%s%s%s", "00", strconv.Itoa(env.nextVethNumber), hashedName)
 	veth2name := fmt.Sprintf("veth%s%s%s", "01", strconv.Itoa(env.nextVethNumber), hashedName)
-	logger.DebugLogger().Println("creating veth pair: " + veth1name + "@" + veth2name)
+	// logger.DebugLogger().Println("creating veth pair: " + veth1name + "@" + veth2name)
 	log.Println("creating veth pair: " + veth1name + "@" + veth2name)
 
-	veth := &netlink.Veth{
-		LinkAttrs: netlink.LinkAttrs{
-			Name: veth1name,
-			MTU:  mtu,
-		},
-		PeerName: veth2name,
-	}
-	err = netlink.LinkAdd(veth)
-	if err != nil {
-		return nil, err
-	}
+	// veth := &netlink.Veth{
+	// 	LinkAttrs: netlink.LinkAttrs{
+	// 		Name: veth1name,
+	// 		MTU:  mtu,
+	// 	},
+	// 	PeerName: veth2name,
+	// }
+	// err = netlink.LinkAdd(veth)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	// add veth1 to the bridge
-	err = netlink.LinkSetMaster(veth, bridge)
-	if err != nil {
-		return nil, err
-	}
+	// // add veth1 to the bridge
+	// err = netlink.LinkSetMaster(veth, bridge)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	// set veth status up
-	if err = netlink.LinkSetUp(veth); err != nil {
-		return nil, err
-	}
+	// // set veth status up
+	// if err = netlink.LinkSetUp(veth); err != nil {
+	// 	return nil, err
+	// }
 
-	return veth, nil
+	return veth1name, veth2name
 }
 
 // sets the FORWARD firewall rules for the bridge veth
@@ -255,158 +254,158 @@ func (env *Environment) setVethFirewallRules(bridgeVethName string) error {
 }
 
 // add routes inside the container namespace to forward the traffic using the bridge
-func (env *Environment) setContainerRoutes(containerPid int, netnsPath string, peerVeth string) error {
-	//Add route to bridge
-	//sudo nsenter -n -t 5565 ip route add 0.0.0.0/0 via 127.19.x.y dev veth013
-	err := env.execInsideNs(containerPid, netnsPath, func() error {
-		link, err := netlink.LinkByName(peerVeth)
-		if err != nil {
-			return err
-		}
-		dst, err := netlink.ParseIPNet("10.30.0.0/16")
-		if err != nil {
-			return err
-		}
-		gw := net.ParseIP(env.config.HostBridgeIP)
-		return netlink.RouteAdd(&netlink.Route{
-			LinkIndex: link.Attrs().Index,
-			Dst:       dst,
-			Gw:        gw,
-		})
-	})
-	if err != nil {
-		logger.ErrorLogger().Printf("Impossible to setup route inside the netns: %v\n", err)
-		return err
-	}
-	return nil
-}
+// func (env *Environment) setContainerRoutes(containerPid int, netnsPath string, peerVeth string) error {
+// 	//Add route to bridge
+// 	//sudo nsenter -n -t 5565 ip route add 0.0.0.0/0 via 127.19.x.y dev veth013
+// 	err := env.execInsideNs(containerPid, netnsPath, func() error {
+// 		link, err := netlink.LinkByName(peerVeth)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		dst, err := netlink.ParseIPNet("10.30.0.0/16")
+// 		if err != nil {
+// 			return err
+// 		}
+// 		gw := net.ParseIP(env.config.HostBridgeIP)
+// 		return netlink.RouteAdd(&netlink.Route{
+// 			LinkIndex: link.Attrs().Index,
+// 			Dst:       dst,
+// 			Gw:        gw,
+// 		})
+// 	})
+// 	if err != nil {
+// 		logger.ErrorLogger().Printf("Impossible to setup route inside the netns: %v\n", err)
+// 		return err
+// 	}
+// 	return nil
+// }
 
-func (env *Environment) setIPv6ContainerRoutes(containerPid int, netnsPath string, peerVeth string) error {
-	err := env.execInsideNs(containerPid, netnsPath, func() error {
-		link, err := netlink.LinkByName(peerVeth)
-		if err != nil {
-			return err
-		}
-		dstv6, err := netlink.ParseIPNet("fdff:2000::/21")
-		if err != nil {
-			return err
-		}
-		gwv6 := net.ParseIP(env.config.HostBridgeIPv6)
-		return netlink.RouteAdd(&netlink.Route{
-			LinkIndex: link.Attrs().Index,
-			Dst:       dstv6,
-			Gw:        gwv6,
-		})
-	})
-	if err != nil {
-		logger.ErrorLogger().Printf("Impossible to setup IPv6 route inside the netns: %v\n", err)
-		return err
-	}
-	return nil
-}
+// func (env *Environment) setIPv6ContainerRoutes(containerPid int, netnsPath string, peerVeth string) error {
+// 	err := env.execInsideNs(containerPid, netnsPath, func() error {
+// 		link, err := netlink.LinkByName(peerVeth)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		dstv6, err := netlink.ParseIPNet("fdff:2000::/21")
+// 		if err != nil {
+// 			return err
+// 		}
+// 		gwv6 := net.ParseIP(env.config.HostBridgeIPv6)
+// 		return netlink.RouteAdd(&netlink.Route{
+// 			LinkIndex: link.Attrs().Index,
+// 			Dst:       dstv6,
+// 			Gw:        gwv6,
+// 		})
+// 	})
+// 	if err != nil {
+// 		logger.ErrorLogger().Printf("Impossible to setup IPv6 route inside the netns: %v\n", err)
+// 		return err
+// 	}
+// 	return nil
+// }
 
 // setup the address of the network namespace veth
-func (env *Environment) addPeerLinkNetwork(nspid int, netnsPath string, addr string, vethname string) error {
-	netlinkAddr, err := netlink.ParseAddr(addr)
-	if err != nil {
-		return err
-	}
-	err = env.execInsideNs(nspid, netnsPath, func() error {
-		link, err := netlink.LinkByName(vethname)
-		if err != nil {
-			return err
-		}
-		err = netlink.AddrAdd(link, netlinkAddr)
-		if err == nil {
-			err = netlink.LinkSetUp(link)
-		}
-		return err
-	})
-	if err != nil {
-		return err
-	}
-	return err
-}
+// func (env *Environment) addPeerLinkNetwork(nspid int, netnsPath string, addr string, vethname string) error {
+// 	netlinkAddr, err := netlink.ParseAddr(addr)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	err = env.execInsideNs(nspid, netnsPath, func() error {
+// 		link, err := netlink.LinkByName(vethname)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		err = netlink.AddrAdd(link, netlinkAddr)
+// 		if err == nil {
+// 			err = netlink.LinkSetUp(link)
+// 		}
+// 		return err
+// 	})
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return err
+// }
 
-// setup the address of the network namespace veth based on Ns name
-func (env *Environment) addPeerLinkNetworkByNsName(NsName string, addr string, vethname string) error {
-	netlinkAddr, err := netlink.ParseAddr(addr)
-	if err != nil {
-		return err
-	}
-	err = env.execInsideNsByName(NsName, func() error {
-		link, err := netlink.LinkByName(vethname)
-		if err != nil {
-			return err
-		}
-		err = netlink.AddrAdd(link, netlinkAddr)
-		if err == nil {
-			err = netlink.LinkSetUp(link)
-		}
-		return err
-	})
-	return err
-}
+// // setup the address of the network namespace veth based on Ns name
+// func (env *Environment) addPeerLinkNetworkByNsName(NsName string, addr string, vethname string) error {
+// 	netlinkAddr, err := netlink.ParseAddr(addr)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	err = env.execInsideNsByName(NsName, func() error {
+// 		link, err := netlink.LinkByName(vethname)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		err = netlink.AddrAdd(link, netlinkAddr)
+// 		if err == nil {
+// 			err = netlink.LinkSetUp(link)
+// 		}
+// 		return err
+// 	})
+// 	return err
+// }
 
 // disable Duplicate Address Detection (DAD) for IPv6 interfaces in namespace
 // to prevent interface startup delay
-func (env *Environment) disableDAD(pid int, netnsPath string, vethname string) error {
-	err := env.execInsideNs(pid, netnsPath, func() error {
-		cmd := exec.Command("sysctl", "-w", "net.ipv6.conf.default.accept_dad=0")
-		err := cmd.Run()
-		if err != nil {
-			return err
-		}
-		cmd = exec.Command("sysctl", "-w", "net.ipv6.conf."+vethname+".accept_dad=0")
-		err = cmd.Run()
-		return err
-	})
-	return err
-}
+// func (env *Environment) disableDAD(pid int, netnsPath string, vethname string) error {
+// 	err := env.execInsideNs(pid, netnsPath, func() error {
+// 		cmd := exec.Command("sysctl", "-w", "net.ipv6.conf.default.accept_dad=0")
+// 		err := cmd.Run()
+// 		if err != nil {
+// 			return err
+// 		}
+// 		cmd = exec.Command("sysctl", "-w", "net.ipv6.conf."+vethname+".accept_dad=0")
+// 		err = cmd.Run()
+// 		return err
+// 	})
+// 	return err
+// }
 
 // Execute function inside a namespace
-func (env *Environment) execInsideNs(pid int, netnsPath string, function func() error) error {
-	var containerNs netns.NsHandle
+// func (env *Environment) execInsideNs(pid int, netnsPath string, function func() error) error {
+// 	var containerNs netns.NsHandle
 
-	runtime.LockOSThread()
-	defer runtime.UnlockOSThread()
+// 	runtime.LockOSThread()
+// 	defer runtime.UnlockOSThread()
 
-	stdNetns, err := netns.Get()
-	if err == nil {
-		defer stdNetns.Close()
-		containerNs, err = netns.GetFromPath(netnsPath)
-		if err == nil {
-			defer netns.Set(stdNetns)
-			err = netns.Set(containerNs)
-			if err == nil {
-				err = function()
-			}
-		}
-	}
-	return err
-}
+// 	stdNetns, err := netns.Get()
+// 	if err == nil {
+// 		defer stdNetns.Close()
+// 		containerNs, err = netns.GetFromPath(netnsPath)
+// 		if err == nil {
+// 			defer netns.Set(stdNetns)
+// 			err = netns.Set(containerNs)
+// 			if err == nil {
+// 				err = function()
+// 			}
+// 		}
+// 	}
+// 	return err
+// }
 
 // Execute function inside a namespace based on Ns name
-func (env *Environment) execInsideNsByName(Nsname string, function func() error) error {
-	var containerNs netns.NsHandle
+// func (env *Environment) execInsideNsByName(Nsname string, function func() error) error {
+// 	var containerNs netns.NsHandle
 
-	runtime.LockOSThread()
-	defer runtime.UnlockOSThread()
+// 	runtime.LockOSThread()
+// 	defer runtime.UnlockOSThread()
 
-	stdNetns, err := netns.Get()
-	if err == nil {
-		defer stdNetns.Close()
-		containerNs, err = netns.GetFromName(Nsname)
-		if err == nil {
-			defer netns.Set(stdNetns)
-			err = netns.Set(containerNs)
-			if err == nil {
-				err = function()
-			}
-		}
-	}
-	return err
-}
+// 	stdNetns, err := netns.Get()
+// 	if err == nil {
+// 		defer stdNetns.Close()
+// 		containerNs, err = netns.GetFromName(Nsname)
+// 		if err == nil {
+// 			defer netns.Set(stdNetns)
+// 			err = netns.Set(containerNs)
+// 			if err == nil {
+// 				err = function()
+// 			}
+// 		}
+// 	}
+// 	return err
+// }
 
 // BookVethNumber Update the veth number to be used for the next veth
 func (env *Environment) BookVethNumber() {

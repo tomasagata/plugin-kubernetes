@@ -19,9 +19,10 @@ spec:
       hostNetwork: true
       containers:
       - name: node-netmanager
-        image: ghcr.io/oakestra/plugin-kubernetes/plugin-kubernetes/oakestra-nodenetmanager:latest
+        # image: ghcr.io/oakestra/plugin-kubernetes/plugin-kubernetes/oakestra-nodenetmanager:latest
+        image: tomasagata/nodenetmanager:latest
         imagePullPolicy: Always
-        command: ['sh', '-c', 'netmanager']
+        command: ['sh', '-c', 'netmanager -D']
         ports:
         - containerPort: 6000
         securityContext:
@@ -44,7 +45,7 @@ spec:
         - name: MOSQUITTO_SVC_SERVICE_PORT
           value: "30033"
         - name: MOSQUITTO_SVC_SERVICE_HOST
-          value: "10.100.254.89" 
+          value: "145.100.131.40" # CHANGE to NodePort of one kubernetes node
       volumes:
       - name: host-more
         hostPath:
@@ -57,16 +58,18 @@ spec:
           path: /
       initContainers:
       - name: init-cni-bin
-        image: ghcr.io/oakestra/plugin-kubernetes/plugin-kubernetes/oakestra-cni:latest
+        # image: ghcr.io/oakestra/plugin-kubernetes/plugin-kubernetes/oakestra-cni:latest
+        image: tomasagata/oakestra-cni:latest
         imagePullPolicy: Always
-        command: ['sh', '-c', 'cp /app/oakestra /opt/cni/bin/']
+        command: ['sh', '-c', 'cp /app/oakestra /host/opt/cni/bin/']
         volumeMounts:
         - name: cni-bin
-          mountPath: /opt/cni/bin
+          mountPath: /host/opt/cni/bin
         securityContext:
           privileged: true
       - name: init-netmanager-bin
-        image: ghcr.io/jakobke/oakestra-net-manager-exec:1.0-amd
+        # image: ghcr.io/jakobke/oakestra-net-manager-exec:1.0-amd
+        image: tomasagata/nodenetmanager:latest
         imagePullPolicy: Always
         command: ['sh', '-c', 'cp /app/netmanager /root/bin/']
         volumeMounts:
@@ -84,7 +87,7 @@ metadata:
   namespace: oakestra-system
 
 
---- 
+---
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole

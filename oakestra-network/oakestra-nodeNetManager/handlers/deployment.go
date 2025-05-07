@@ -5,7 +5,6 @@ import (
 	"NetManager/logger"
 	"NetManager/mqtt"
 	"fmt"
-	"net"
 	"net/http"
 	"strings"
 	"sync"
@@ -34,8 +33,7 @@ type k8sDeployTask struct {
 }
 
 type TaskReady struct {
-	IP   net.IP
-	IPv6 net.IP
+	deployment DeployResponse
 	Err  error
 }
 
@@ -71,13 +69,12 @@ func (t *deployTaskQueue) taskExecutor() {
 		select {
 		case task := <-t.newTask:
 			// deploy the network stack in the container
-			addr, addrv6, err := deploymentHandler(task)
+			response, err := deploymentHandler(task)
 			if err != nil {
 				logger.ErrorLogger().Println("[ERROR]: ", err)
 			}
 			task.Finish <- TaskReady{
-				IP:   addr,
-				IPv6: addrv6,
+				deployment: *response,
 				Err:  err,
 			}
 			// asynchronously update proxy tables
@@ -86,22 +83,22 @@ func (t *deployTaskQueue) taskExecutor() {
 	}
 }
 
-func deploymentHandler(requestStruct *ContainerDeployTask) (net.IP, net.IP, error) {
+func deploymentHandler(requestStruct *ContainerDeployTask) (*DeployResponse, error) {
 	// get app full name
 	appCompleteName := strings.Split(requestStruct.ServiceName, ".")
 	if len(appCompleteName) != 4 {
-		return nil, nil, fmt.Errorf("invalid app name: %s", appCompleteName)
+		return nil, fmt.Errorf("invalid app name: %s", appCompleteName)
 	}
 
 	// attach network to the container
 	netHandler := env.GetNetDeployment(requestStruct.Runtime)
 	logger.DebugLogger().Printf("Got netHandler: %v", netHandler)
 
-	addr, addrv6, err := netHandler.DeployNetwork(requestStruct.Pid, requestStruct.NetworkNamespace, requestStruct.ServiceName, requestStruct.Instancenumber, requestStruct.PortMappings)
-	logger.InfoLogger().Println("Adresses ", addr, addrv6)
+	params, err := netHandler.DeployNetwork(requestStruct.Pid, requestStruct.NetworkNamespace, requestStruct.ServiceName, requestStruct.Instancenumber, requestStruct.PortMappings)
+	logger.InfoLogger().Printf("Deployment: %+v", params)
 	if err != nil {
 		logger.ErrorLogger().Println("[ERROR]:", err)
-		return nil, nil, err
+		return nil, err
 	}
 
 	// notify to net-component
@@ -109,18 +106,33 @@ func deploymentHandler(requestStruct *ContainerDeployTask) (net.IP, net.IP, erro
 		requestStruct.ServiceName,
 		"DEPLOYED",
 		requestStruct.Instancenumber,
-		addr.String(),
-		addrv6.String(),
+		params.ContainerIP.String(),
+		params.ContainerIPv6.String(),
 		requestStruct.PublicAddr,
 		requestStruct.PublicPort,
 	)
 
 	if err != nil {
 		logger.ErrorLogger().Println("[ERROR]:", err)
-		return nil, nil, err
+		return nil, err
 	}
 
-	return addr, addrv6, nil
+	response := &DeployResponse{
+		ServiceName: params.ServiceName,
+		HostVethName: params.HostVethName,
+		HostBridgeName: params.HostBridgeName,
+		HostBridgeIP: params.HostBridgeIP.String(),
+		HostBridgeIPMask: params.HostBridgeIPMask,
+		HostBridgeIPv6: params.HostBridgeIPv6.String(),
+		HostBridgeIPv6Mask: params.HostBridgeIPv6Mask,
+		ContainerVethName: params.ContainerVethName,
+		ContainerNetNs: requestStruct.NetworkNamespace,
+		ContainerIP: params.ContainerIP.String(),
+		ContainerIPv6: params.ContainerIPv6.String(),
+		Mtu: params.Mtu,
+	}
+
+	return response, nil
 }
 
 func updateInternalProxyDataStructures(requestStruct *ContainerDeployTask) {

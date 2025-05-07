@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"log"
+	"net"
 	"net/http"
+	"oakestra/cni-plugin/env"
+	"oakestra/cni-plugin/logger"
+	"oakestra/cni-plugin/models"
 	"os"
 	"runtime"
 	"runtime/debug"
@@ -27,38 +30,39 @@ func init() {
 	// must ensure that the goroutine does not jump from OS thread to thread
 	runtime.LockOSThread()
 
-	logDir := "/var/log/oakestra"
-	logFilePath := logDir + "/cni_log.txt"
+	// logDir := "/var/log/oakestra"
+	// logFilePath := logDir + "/cni_log.txt"
 
-	// Create the log directory if it doesn't exist
-	err := os.MkdirAll(logDir, 0755)
-	if err != nil {
-		fmt.Printf("Fehler beim Erstellen des Verzeichnisses: %v\n", err)
-		os.Exit(1)
-	}
+	// // Create the log directory if it doesn't exist
+	// err := os.MkdirAll(logDir, 0755)
+	// if err != nil {
+	// 	fmt.Printf("Fehler beim Erstellen des Verzeichnisses: %v\n", err)
+	// 	os.Exit(1)
+	// }
 
-	// Open the log file for appending
-	// or create it if it doesn't exist
-	logFile, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		fmt.Printf("Fehler beim Öffnen der Logdatei: %v\n", err)
-		os.Exit(1)
-	}
+	// // Open the log file for appending
+	// // or create it if it doesn't exist
+	// logFile, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	// if err != nil {
+	// 	fmt.Printf("Fehler beim Öffnen der Logdatei: %v\n", err)
+	// 	os.Exit(1)
+	// }
 
-	log.SetOutput(logFile)
-	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
+	// log.SetOutput(logFile)
+	// log.SetFlags(log.LstdFlags | log.Lmicroseconds)
+	// log.Printf("Starting Oakestra CNI plugin")
 }
 
 func extractServiceNameAndInstanceNumber(input string) (string, int, error) {
 	parts := strings.Split(input, ".")
 	if len(parts) < 5 {
-		log.Println("Pod not deployed by Oaekestra: Pod name lacks the required five fields.")
+		logger.DebugLogger().Println("Pod not deployed by Oaekestra: Pod name lacks the required five fields.")
 		return "", 0, fmt.Errorf("pod name lacks required Oaekestra information")
 	}
 	serviceName := strings.Join(parts[:len(parts)-1], ".")
 	instanceNumber, err := strconv.Atoi(string(parts[4][0]))
 	if err != nil {
-		log.Println("Pod not deployed by Oaekestra, or the instance number could not be parsed.")
+		logger.DebugLogger().Println("Pod not deployed by Oaekestra, or the instance number could not be parsed.")
 		return "", 0, fmt.Errorf("pod name lacks required Oaekestra information")
 	}
 	return serviceName, instanceNumber, nil
@@ -100,12 +104,11 @@ func cmdAdd(args *skel.CmdArgs) (err error) {
 		}
 	}()
 
-	log.Printf("ADD COMMAND")
-	log.Println(args)
+	logger.InfoLogger().Printf("ADD COMMAND")
+	logger.DebugLogger().Printf("Incoming request: %+v\n", *args)
 
 	conf := types.NetConf{}
 	conf.CNIVersion = "0.3.0"
-	var result cniv1.Result
 
 	podName, podNamespace := extractPodNameAndNamespace(args.Args)
 
@@ -118,7 +121,7 @@ func cmdAdd(args *skel.CmdArgs) (err error) {
 	parts := strings.Split(args.Netns, "/")
 	networkNamespace := parts[len(parts)-1]
 
-	requestBody := connectNetworkRequest{
+	requestBody := models.ConnectNetworkRequest{
 		NetworkNamespace: networkNamespace,
 		Servicename:      serviceName,
 		Instancenumber:   instanceNumber,
@@ -126,9 +129,58 @@ func cmdAdd(args *skel.CmdArgs) (err error) {
 	}
 
 	netmanagerURL := "http://localhost:6000/container/deploy"
-	_, err = sendDataToNetmanager(requestBody, netmanagerURL)
+	resp, err := sendDataToNetmanager(requestBody, netmanagerURL)
 	if err != nil {
-		log.Fatalf("Oakestra NetManager not reachable: %v", err)
+		logger.ErrorLogger().Fatalf("Oakestra NetManager not reachable: %v", err)
+	}
+
+
+	// Read the response body
+	var details models.ConnectNetworkResponse
+	err = json.NewDecoder(resp.Body).Decode(&details)
+	if err != nil {
+		logger.ErrorLogger().Printf("Error decoding response: %v", err)
+		return err
+	}
+	resp.Body.Close()
+	logger.DebugLogger().Printf("Network deployment details: %+v", details)
+
+
+	err = env.DeployNetwork(&details)
+	if err != nil {
+		logger.ErrorLogger().Printf("Error deploying network: %v", err)
+		return err
+	}
+	
+
+	cidr := details.ContainerIP + details.HostBridgeIPMask
+	_, ipnet, err := net.ParseCIDR(cidr)
+	if err != nil {
+		logger.ErrorLogger().Printf("Invalid CIDR %s: %v", cidr, err)
+		return err
+	}
+	
+	gateway := net.ParseIP(details.HostBridgeIP)
+	if gateway == nil {
+		logger.ErrorLogger().Printf("Invalid gateway IP: %s", details.HostBridgeIP)
+		return fmt.Errorf("invalid gateway IP")
+	}
+	
+	result := cniv1.Result{
+		CNIVersion: conf.CNIVersion,
+		Interfaces: []*cniv1.Interface{
+			{
+				Name:    details.ContainerVethName,
+				Sandbox: args.Netns,
+			},
+		},
+		IPs: []*cniv1.IPConfig{
+			{
+				Interface: cniv1.Int(0),
+				Address:   *ipnet,
+				Gateway:   gateway,
+			},
+		},
 	}
 
 	// TODO - This needs to be extended
@@ -155,8 +207,8 @@ func cmdDel(args *skel.CmdArgs) (err error) {
 		}
 	}()
 
-	log.Printf("DEL COMMAND")
-	log.Println(args)
+	logger.InfoLogger().Printf("DEL COMMAND")
+	logger.DebugLogger().Printf("Incoming request: %+v\n", *args)
 
 	podName, podNamespace := extractPodNameAndNamespace(args.Args)
 	serviceName, instanceNumber, err := extractServiceNameAndInstanceNumber(podName)
@@ -165,36 +217,51 @@ func cmdDel(args *skel.CmdArgs) (err error) {
 		instanceNumber = 0
 	}
 
-	requestBody := dettachNetworkRequest{
+	requestBody := models.DettachNetworkRequest{
 		Servicename:    serviceName,
 		Instancenumber: instanceNumber,
 	}
 
 	netmanagerURL := "http://localhost:6000/container/undeploy"
-	_, err = sendDataToNetmanager(requestBody, netmanagerURL)
+	resp, err := sendDataToNetmanager(requestBody, netmanagerURL)
 	if err != nil {
-		log.Fatalf("Oakestra NetManager not reachable: %v", err)
+		logger.ErrorLogger().Fatalf("Oakestra NetManager not reachable: %v", err)
 	}
 
+	// Read the response body
+	var details models.DettachNetworkResponse
+	err = json.NewDecoder(resp.Body).Decode(&details)
+	if err != nil {
+		logger.ErrorLogger().Printf("Error decoding response: %v", err)
+		return err
+	}
+	resp.Body.Close()
+	logger.DebugLogger().Printf("Network undeployment details: %v", details)
+	
+	err = env.DetachContainer(&details)
+	if err != nil {
+		logger.ErrorLogger().Printf("Error deploying network: %v", err)
+		return err
+	}
+	
 	return
 }
 
-func sendDataToNetmanager(requestBody interface{}, netmanagerURL string) (status string, err error) {
+func sendDataToNetmanager(requestBody interface{}, netmanagerURL string) (resp *http.Response, err error) {
 	jsonData, err := json.Marshal(requestBody)
 	if err != nil {
-		log.Printf("Error creating JSON: %v", err)
-		return "", err
+		logger.ErrorLogger().Printf("Error creating JSON: %v", err)
+		return nil, err
 	}
-	resp, err := http.Post(netmanagerURL, "application/json", bytes.NewBuffer(jsonData))
+	resp, err = http.Post(netmanagerURL, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
-		log.Printf("Error sending request: %v", err)
-		return "", err
+		logger.ErrorLogger().Printf("Error sending request: %v", err)
+		return nil, err
 	}
-	defer resp.Body.Close()
 
-	log.Printf("Server Response: %v", resp.Status)
+	logger.DebugLogger().Printf("Server Response: %v", resp.Status)
 
-	return resp.Status, nil
+	return resp, nil
 }
 
 func cmdDummyCheck(args *skel.CmdArgs) (err error) {

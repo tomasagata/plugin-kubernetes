@@ -86,7 +86,6 @@ Method: POST
 Request Json:
 
 	{
-		pid:string #pid of container's task
 		appName:string
 		instanceNumber:int
 		portMapppings: map[int]int (host port, container port)
@@ -145,17 +144,10 @@ func (m *ContainerManager) containerDeploy(writer http.ResponseWriter, request *
 		return
 	}
 
-	//if deploy succesfull -> answer the caller
-	response := DeployResponse{
-		ServiceName: deployTask.ServiceName,
-		NsAddress:   result.IP.String(),
-		NsAddressv6: result.IPv6.String(),
-	}
-
-	logger.InfoLogger().Println("Response to /container/deploy: ", response)
+	logger.InfoLogger().Println("Response to /container/deploy: ", result.deployment)
 
 	writer.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(writer).Encode(response)
+	err = json.NewEncoder(writer).Encode(result.deployment)
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
 	}
@@ -172,7 +164,12 @@ Request Json:
 		instance:int
 	}
 
-Response: 200 OK or Failure code
+Response Json:
+
+	{
+		serviceName:    string
+		nsAddress:  	string # address assigned to this container
+	}
 */
 func (m *ContainerManager) containerUndeploy(writer http.ResponseWriter, request *http.Request) {
 	log.Println("Received HTTP request - /container/undeploy ")
@@ -192,7 +189,20 @@ func (m *ContainerManager) containerUndeploy(writer http.ResponseWriter, request
 
 	log.Println(requestStruct)
 
-	m.Env.DetachContainer(requestStruct.Servicename, requestStruct.Instancenumber)
+	params, err := m.Env.DetachContainer(requestStruct.Servicename, requestStruct.Instancenumber)
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	response := undeployResponse{
+		VethPeer1Name:   params.HostVethName,
+	}
 
-	writer.WriteHeader(http.StatusOK)
+	logger.InfoLogger().Println("Response to /container/undeploy: ", response)
+
+	writer.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(writer).Encode(response)
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+	}
 }

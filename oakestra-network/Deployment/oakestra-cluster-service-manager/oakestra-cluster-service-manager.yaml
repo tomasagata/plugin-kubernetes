@@ -12,7 +12,7 @@ spec:
     metadata:
       labels:
         app: cluster
-    spec:  
+    spec:
       affinity:
         podAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -35,17 +35,17 @@ spec:
         - name: MQTT_BROKER_PORT
           value: "10003"
         - name: MQTT_BROKER_URL
-          value: "10.108.68.155"
+          value: "10.97.65.36" # CHANGE to ClusterIP of Mosquitto Service
         - name: ROOT_SERVICE_MANAGER_URL
-          value: "10.100.253.57"
+          value: "145.100.135.42" # CHANGE to IP Oakestra Root Network
         - name: ROOT_SERVICE_MANAGER_PORT
           value: "10099"
         - name: SYSTEM_MANAGER_URL
-          value: "10.100.253.57"
+          value: "145.100.135.42" # CHANGE to IP Oakestra Root
         - name: SYSTEM_MANAGER_PORT
           value: "10000"
         - name: CLUSTER_MONGO_URL
-          value: "10.111.63.237" 
+          value: "10.108.88.59" # CHANGE to ClusterIP of MongoDB Service
         - name: CLUSTER_MONGO_PORT
           value: "27017"
 ---
@@ -62,5 +62,5 @@ spec:
   - protocol: TCP
     port: 10110
     targetPort: 10110
-    nodePort: 30330 
+    nodePort: 30330
 

@@ -23,7 +23,7 @@ spec:
         - containerPort: 80
         env:
         - name: ROOT_SYSTEM_MANAGER_IP
-          value: "10.100.253.57"
+          value: "145.100.135.42" # CHANGE to IP Oakestra Root
         - name: ROOT_SYSTEM_MANAGER_PORT
           value: "10000"
         - name: ROOT_SERIVCE_MANAGER_PORT
@@ -31,9 +31,9 @@ spec:
         - name: ROOT_GRPC_PORT
           value: "50052"
         - name: CLUSTER_NAME
-          value: "KUBERNETES"
+          value: "kubernetes" # CHANGE to Name of Cluster (use `kubectl config view`)
         - name: CLUSTER_LOCATION
-          value: "KUBERNETES_LOCATION"
+          value: "Amsterdam" # CHANGE to Location of Cluster (e.g. Amsterdam)
         - name: MY_PORT
           value: "10100"
         - name: NODE_PORT
@@ -41,11 +41,11 @@ spec:
         - name: CLUSTER_SERVICE_MANAGER_PORT
           value: "30330"
         - name: CLUSTER_SERVICE_MANAGER_IP
-          value: "10.100.254.89" 
+          value: "145.100.131.40" # CHANGE to Node IP of any kubernetes node
           # Set to 'localhost' since this is a NodePort service
 
 
-    
+
 ---
 
 apiVersion: v1
@@ -102,7 +102,7 @@ roleRef:
   name: oakestra-agent
   apiGroup: rbac.authorization.k8s.io
 
---- 
+---
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

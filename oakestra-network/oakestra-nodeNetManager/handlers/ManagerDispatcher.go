@@ -17,10 +17,23 @@ type undeployRequest struct {
 	Instancenumber int    `json:"instanceNumber"`
 }
 
+type undeployResponse struct {
+	VethPeer1Name string `json:"vethPeer1Name"`
+}
+
 type DeployResponse struct {
 	ServiceName string `json:"serviceName"`
-	NsAddress   string `json:"nsAddress"`
-	NsAddressv6 string `json:"nsAddressv6"`
+	HostVethName string `json:"hostVethName"`
+	HostBridgeName string `json:"hostBridgeName"`
+	HostBridgeIP string `json:"hostBridgeIP"`
+	HostBridgeIPMask string `json:"hostBridgeIPMask"`
+	HostBridgeIPv6 string `json:"hostBridgeIPv6"`
+	HostBridgeIPv6Mask string `json:"hostBridgeIPv6Mask"`
+	ContainerVethName string `json:"containerVethName"`
+	ContainerNetNs string `json:"containerNetNs"`
+	ContainerIP string `json:"containerIP"`
+	ContainerIPv6 string `json:"containerIPv6"`
+	Mtu       int    `json:"mtu"`
 }
 
 var AvailableRuntimes = make(map[string]func() ManagerInterface)
