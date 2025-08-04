@@ -3,9 +3,6 @@ resources:
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 images:
-# - name: controller
-#   newName: ghcr.io/jakobke/oakestra-controller
-#   newTag: "1.0"
 - name: controller
-  newName: tomasagata/oakestra-controller-manager
+  newName: ghcr.io/oakestra/plugin-kubernetes/plugin-kubernetes/oakestra-controller-manager
   newTag: latest
