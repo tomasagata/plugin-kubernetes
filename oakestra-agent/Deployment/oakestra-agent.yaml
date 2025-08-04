@@ -23,7 +23,7 @@ spec:
         - containerPort: 80
         env:
         - name: ROOT_SYSTEM_MANAGER_IP
-          value: "145.100.135.42" # CHANGE to IP Oakestra Root
+          value: "10.100.253.57"
         - name: ROOT_SYSTEM_MANAGER_PORT
           value: "10000"
         - name: ROOT_SERIVCE_MANAGER_PORT
@@ -31,9 +31,9 @@ spec:
         - name: ROOT_GRPC_PORT
           value: "50052"
         - name: CLUSTER_NAME
-          value: "kubernetes" # CHANGE to Name of Cluster (use `kubectl config view`)
+          value: "KUBERNETES"
         - name: CLUSTER_LOCATION
-          value: "Amsterdam" # CHANGE to Location of Cluster (e.g. Amsterdam)
+          value: "KUBERNETES_LOCATION"
         - name: MY_PORT
           value: "10100"
         - name: NODE_PORT
@@ -41,7 +41,7 @@ spec:
         - name: CLUSTER_SERVICE_MANAGER_PORT
           value: "30330"
         - name: CLUSTER_SERVICE_MANAGER_IP
-          value: "145.100.131.40" # CHANGE to Node IP of any kubernetes node
+          value: "10.100.254.89" 
           # Set to 'localhost' since this is a NodePort service
 
 

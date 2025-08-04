@@ -179,15 +179,13 @@ func (r *OakestraJobReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 
 		deployment.Spec.Template.Annotations = map[string]string{
-			"k8s.v1.cni.cncf.io/networks": "[{\"name\": \"oakestra-cni\"},{\"name\":\"iml-cni\", \"namespace\":\"default\", \"cni-args\":{\"app_type\": \"application_function\", \"app_id\":\"" + oakestraJob.Spec.MicroserviceID + "\"}}]",
+			"k8s.v1.cni.cncf.io/networks": "oakestra-cni",
 			"oakestraPort":                oakestraJob.Spec.Port,
 		}
 
 		// replicaCount := int32(10)
 		// deployment.Spec.Replicas = &replicaCount
 		deployment.Spec.Template.Spec.RestartPolicy = corev1.RestartPolicyAlways
-
-		deployment.Spec.Template.Spec.NodeName = "mc-a7"
 
 		deployment.Spec.Template.Spec.Containers = []corev1.Container{
 			{
