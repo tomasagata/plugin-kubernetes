@@ -18,7 +18,7 @@ var debugonce sync.Once
 var debugMode = true
 
 
-const logFilePath = "/var/log/oakestra/cni_log2.txt"
+const logFilePath = "/var/log/oakestra/cni.log"
 
 type EventType string
 
