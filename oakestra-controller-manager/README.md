@@ -17,17 +17,31 @@ The Controller Manager simply needs to be initiated. The resources are then util
 
 ### To Deploy on the cluster
 
-**Install the CRDs into the cluster:**
-
 ```sh
-make install
+kubectl apply -f dist/install
 ```
 
-**Deploy the Manager to the cluster with the image specified by `IMG`:**
+### To remove from the cluster
 
 ```sh
-make deploy IMG=ghcr.io/jakobke/oakestra-controller:1.0
+kubectl delete -f dist/install
 ```
+
+### To develop new features or changes
+
+Build the installer with
+```sh
+# Replace the image with the image name of your choice.
+# If you don't want to keep adding the IMG environment variable, you can change it
+# from the Makefile
+make build-installer IMG=<Your image name of choice>
+```
+
+Then build the image using
+```sh
+make docker-buildx IMG=<Your image name of choice>
+```
+
 
 > **NOTE**: If you encounter RBAC errors, you may need to grant yourself cluster-admin 
 privileges or be logged in as admin.

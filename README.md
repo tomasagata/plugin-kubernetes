@@ -45,7 +45,7 @@ To communicate with additional Oakestra resources, a separate Container Network 
 To use two CNIs per container, Multus is required. The following commands must be executed:
 
 
-```bash
+```sh
 kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset.yml
 
 kubectl apply -f oakestra-network/Deployment/oakestra-cni/oakesta-cni.yaml -n oakestra
@@ -55,24 +55,22 @@ kubectl apply -f oakestra-network/Deployment/oakestra-cni/oakesta-cni.yaml -n oa
 #### 2.3 Oakestra Cluster Service Manager
 This component needs to run once per cluster and requires a MongoDB and an MQTT server.
 
-
-```bash
+```sh
 kubectl apply -f oakestra-network/Deployment/oakestra-cluster-service-manager/mosquitto/ -n oakestra-system
 
 kubectl apply -f oakestra-network/Deployment/oakestra-cluster-service-manager/mongodb/ -n oakestra-system
-
 ```
 
-**Check ReadMe for Oakestra Cluster Service Manager**
-```bash
+For the next step, you'll need to **check README for Oakestra Cluster Service Manager**. You'll need to change some environment variables. Once done that, run the following command to deploy the cluster service manager
+```sh
 kubectl apply -f oakestra-network/Deployment/oakestra-cluster-service-manager/oakestra-cluster-service-manager.yaml -n oakestra-system
 ```
 
 #### 2.4 Oakestra Node NetManager
 This component must also run on all nodes; it is responsible for ensuring that the containers in Kubernetes find the correct routing.
 
-```bash
-
+```sh
+# If you're using calico, run this command. Otherwise you can safely skip it.
 kubectl set env daemonset/calico-node -n kube-system IP_AUTODETECTION_METHOD="skip-interface=goProxy.*"
 
 kubectl apply -f oakestra-network/Deployment/oakestra-nodenetmanager/node-netmanager.yaml -n oakestra-system
@@ -85,7 +83,7 @@ The agent is needed to register with the cluster and establish communication wit
 The following Kubernetes deployment must be initiated:
 
 
-```bash
+```sh
 kubectl apply -f oakestra-agent/Deployment/oakestra-agent.yaml
 ```
 
@@ -100,10 +98,6 @@ The following commands must be executed:
 The current documentation can be found [here](https://cert-manager.io/docs/installation/). 
 
 
-```bash
-cd oakestra-controller-manager
-
-make install
-
-make deploy 
+```sh
+kubectl apply -f oakestra-controller-manager/dist/install.yaml
 ```

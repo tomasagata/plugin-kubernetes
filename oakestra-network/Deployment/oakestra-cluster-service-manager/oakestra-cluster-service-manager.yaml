@@ -35,9 +35,9 @@ spec:
         - name: MQTT_BROKER_PORT
           value: "10003"
         - name: MQTT_BROKER_URL
-          value: "10.97.65.36" # CHANGE to ClusterIP of Mosquitto Service
+          value: "10.110.251.18" # CHANGE to ClusterIP of Mosquitto Service
         - name: ROOT_SERVICE_MANAGER_URL
-          value: "145.100.135.42" # CHANGE to IP Oakestra Root Network
+          value: "145.100.135.42" # CHANGE to IP Oakestra Root
         - name: ROOT_SERVICE_MANAGER_PORT
           value: "10099"
         - name: SYSTEM_MANAGER_URL
@@ -45,7 +45,7 @@ spec:
         - name: SYSTEM_MANAGER_PORT
           value: "10000"
         - name: CLUSTER_MONGO_URL
-          value: "10.108.88.59" # CHANGE to ClusterIP of MongoDB Service
+          value: "10.108.148.182" # CHANGE to ClusterIP of MongoDB Service
         - name: CLUSTER_MONGO_PORT
           value: "27017"
 ---
