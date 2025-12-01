@@ -187,7 +187,7 @@ func (r *OakestraJobReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		// deployment.Spec.Replicas = &replicaCount
 		deployment.Spec.Template.Spec.RestartPolicy = corev1.RestartPolicyAlways
 
-		deployment.Spec.Template.Spec.NodeName = "oai-01"
+		deployment.Spec.Template.Spec.NodeName = "cloud0hexiang"
 
 		deployment.Spec.Template.Spec.Containers = []corev1.Container{
 			{

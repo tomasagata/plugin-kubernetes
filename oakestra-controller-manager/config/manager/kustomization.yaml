@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: tomasagata/oakestra-controller-manager
-  newTag: latest
+  newTag: hexiang

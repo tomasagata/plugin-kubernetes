@@ -599,7 +599,7 @@ spec:
             configMapKeyRef:
               key: OAKESTRA_ROOT_IP
               name: oakestra-cluster-info
-        image: tomasagata/oakestra-controller-manager:latest
+        image: tomasagata/oakestra-controller-manager:hexiang
         livenessProbe:
           httpGet:
             path: /healthz
