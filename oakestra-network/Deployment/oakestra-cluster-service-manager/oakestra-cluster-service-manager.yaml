@@ -25,6 +25,7 @@ spec:
             topologyKey: kubernetes.io/hostname
       containers:
       - name: cluster-service-manager
+        # image: ghcr.io/oakestra/plugin-kubernetes/plugin-kubernetes/oakestra-cluster-service-manager:latest
         image: ghcr.io/jakobke/oakestra-cluster-service-manager:0.2-amd
         imagePullPolicy: Always
         ports:
